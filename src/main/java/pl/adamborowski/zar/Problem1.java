@@ -1,0 +1,51 @@
+package pl.adamborowski.zar;
+
+import pl.adamborowski.dcframework.Problem;
+
+class Problem1 implements Problem<Problem1.Params, Double> {
+    public Double compute(Params params) {
+        return compute(params.a, params.b);
+    }
+
+    public boolean testDivide(Params params) {
+        double middle = params.middle();
+        double big = compute(params);
+        double small = compute(params.a, middle) + compute(middle, params.b);
+        double range = Math.abs(params.a - params.b);
+        double error = big - small;
+        return range > .1 || error > 0.003;
+    }
+
+    private double compute(double a, double b) {
+        double delta = b - a;
+        double fa = f(a);
+        double fb = f(b);
+        return (fa + fb) / 2 * delta;
+    }
+
+    public Double merge(Double left, Double right) {
+        return left + right;
+    }
+
+    private double f(double x) {
+        return Math.sin(x + 2) * ((Math.cos(3 * x - 2))) / 0.1 * x;
+    }
+
+    public DividedParams<Params> divide(Params params) {
+        DividedParams<Params> d = new DividedParams<Params>();
+        d.leftParams.a = params.a;
+        d.leftParams.b = params.middle();
+        d.rightParams.a = d.leftParams.b;
+        d.rightParams.b = params.b;
+        return d;
+    }
+
+    static class Params {
+        public double a;
+        public double b;
+
+        double middle() {
+            return (a + b) / 2;
+        }
+    }
+}
