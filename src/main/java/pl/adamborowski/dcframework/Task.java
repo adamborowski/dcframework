@@ -29,6 +29,7 @@ public class Task<Params, Result> {
     boolean remote = false;
 
     @Getter
+    @Setter
     boolean rootTask = false;
 
     public void setComputed(Result result) {

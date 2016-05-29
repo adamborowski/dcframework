@@ -1,5 +1,7 @@
 package pl.adamborowski.dcframework;
 
+import org.apache.log4j.Logger;
+
 import java.util.Vector;
 
 public class BaseSolver<Params, Result> extends AbstractSolver<Params, Result> {
@@ -17,6 +19,10 @@ public class BaseSolver<Params, Result> extends AbstractSolver<Params, Result> {
     protected void init() {
         taskFactory = new SimpleTaskFactory<>(nodeId);
         localQueue = new SimpleLocalQueue<>();
+        Task<Params, Result> rootTask = taskFactory.createTask();
+        rootTask.setup(null, null, initialParams);
+        rootTask.setRootTask(true);
+        localQueue.add(rootTask);
     }
 
 
@@ -35,7 +41,10 @@ public class BaseSolver<Params, Result> extends AbstractSolver<Params, Result> {
         public void step() throws InterruptedException {
             output.clear();
             input.clear();
+            Logger.getLogger(BaseSolver.class).info("Step");
             localQueue.drainTo(input, batchSize);
+            Logger.getLogger(BaseSolver.class).info("Got " + input.size() + " elements.");
+
             for (Task<Params, Result> task : input) {
                 if (task.inState(Task.State.DEAD)) {
                     // the second node from merge

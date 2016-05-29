@@ -33,16 +33,23 @@ class Problem1 implements Problem<Problem1.Params, Double> {
 
     public DividedParams<Params> divide(Params params) {
         DividedParams<Params> d = new DividedParams<Params>();
-        d.leftParams.a = params.a;
-        d.leftParams.b = params.middle();
-        d.rightParams.a = d.leftParams.b;
-        d.rightParams.b = params.b;
+        d.leftParams = Params.of(params.a, params.middle());
+        d.rightParams = Params.of(params.middle(), params.b);
         return d;
     }
 
     static class Params {
         public double a;
         public double b;
+
+        public Params(double a, double b) {
+            this.a = a;
+            this.b = b;
+        }
+
+        static Params of(double a, double b) {
+            return new Params(a, b);
+        }
 
         double middle() {
             return (a + b) / 2;

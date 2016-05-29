@@ -20,6 +20,11 @@ public class SimpleLocalQueue<Params, Result> implements LocalQueue<Params, Resu
     }
 
     @Override
+    public void add(Task<Params, Result> task) {
+        queue.add(task);
+    }
+
+    @Override
     public void drainTo(Collection<Task<Params, Result>> collection, int numTasks) throws InterruptedException {
         queue.drainTo(collection, numTasks);
         if (collection.isEmpty()) {

@@ -25,25 +25,31 @@ public abstract class AbstractSolver<Params, Result> {
     @Getter
     private boolean working = true;
     private Result result;
+    protected Params initialParams;
 
-    private List<AbstractWorker> workers = new LinkedList<>();
+    private List<Thread> workers = new LinkedList<>();
 
     protected void complete(Result result) {
         this.result = result;
         working = false;
+        for (Thread worker : workers) {
+            worker.interrupt();
+        }
     }
 
 
     protected abstract AbstractWorker createWorker();
 
     public Result process(Params params) {
+        initialParams = params;
         init();
         CountDownLatch latch = new CountDownLatch(numThreads);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < numThreads; i++) {
             AbstractWorker worker = createWorker();
-            workers.add(worker);
             worker.setCountDownLatch(latch);
-            new Thread(worker).start();
+            Thread thread = new Thread(worker, "Worker " + i);
+            thread.start();
+            workers.add(thread);
         }
         try {
             latch.await();
@@ -70,7 +76,7 @@ public abstract class AbstractSolver<Params, Result> {
                 try {
                     step();
                 } catch (InterruptedException e) {
-                    Throwables.propagate(e);
+//                    Throwables.propagate(e);
                     // TODO: 29.05.2016 check if this case always means that another thread finished the job and there is no point to wait for a task
                 }
             }

@@ -15,6 +15,7 @@ public interface LocalQueue<Params, Result> {
      * @param tasks
      */
     void addAll(Collection<Task<Params, Result>> tasks);
+    void add(Task<Params, Result> task);
 
     /**
      * Blocking, if there is any tasks in local queue - pick tasks
