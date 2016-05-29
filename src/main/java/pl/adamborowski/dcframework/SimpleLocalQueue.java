@@ -1,6 +1,5 @@
 package pl.adamborowski.dcframework;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -10,9 +9,9 @@ public class SimpleLocalQueue<Params, Result> implements LocalQueue<Params, Resu
     public static final int INITIAL_QUEUE_CAPACITY = 1000;
 
 
-    //create manager thread for this queue to occasionally check if we should move some tasks out of or into the queue to activemq queue
-    final BlockingQueue<Task<Params, Result>> queue = new LinkedBlockingQueue<>(INITIAL_QUEUE_CAPACITY);
 
+    //create manager thread for this queue to occasionally check if we should move some tasks out of or into the queue to activemq queue
+    final BlockingQueue<Task<Params, Result>> queue = new LinkedBlockingQueue<>();
 
     @Override
     public void addAll(Collection<Task<Params, Result>> collection) {
@@ -30,5 +29,6 @@ public class SimpleLocalQueue<Params, Result> implements LocalQueue<Params, Resu
         if (collection.isEmpty()) {
             collection.add(queue.take());
         }
+        log.trace("Queue size after drain: " + queue.size());
     }
 }

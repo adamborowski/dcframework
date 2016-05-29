@@ -1,5 +1,7 @@
 package pl.adamborowski.dcframework;
 
+import org.apache.log4j.Logger;
+
 import java.util.Collection;
 
 /**
@@ -25,4 +27,6 @@ public interface LocalQueue<Params, Result> {
      * @return
      */
     void drainTo(Collection<Task<Params, Result>> collection, int numTasks) throws InterruptedException;
+
+    Logger log = Logger.getLogger(LocalQueue.class);
 }

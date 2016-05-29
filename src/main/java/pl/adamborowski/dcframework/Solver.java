@@ -3,12 +3,15 @@ package pl.adamborowski.dcframework;
 import com.google.common.base.Throwables;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.log4j.Logger;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-public abstract class AbstractSolver<Params, Result> {
+public abstract class Solver<Params, Result> {
+
+    protected static Logger log = Logger.getLogger(Solver.class);
 
     protected Problem<Params, Result> problem;
     private int numThreads;
@@ -41,7 +44,9 @@ public abstract class AbstractSolver<Params, Result> {
     protected abstract AbstractWorker createWorker();
 
     public Result process(Params params) {
+
         initialParams = params;
+        log.info(String.format("Starting processing with %s threads.", numThreads));
         init();
         CountDownLatch latch = new CountDownLatch(numThreads);
         for (int i = 0; i < numThreads; i++) {

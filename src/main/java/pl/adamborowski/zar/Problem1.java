@@ -12,8 +12,8 @@ class Problem1 implements Problem<Problem1.Params, Double> {
         double big = compute(params);
         double small = compute(params.a, middle) + compute(middle, params.b);
         double range = Math.abs(params.a - params.b);
-        double error = big - small;
-        return range > .1 || error > 0.003;
+        double error = Math.abs(big - small);
+        return range < 0.0000001 || error > 0.0000001;
     }
 
     private double compute(double a, double b) {

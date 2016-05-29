@@ -25,13 +25,12 @@ public class Main {
 
             return;
         }
-
+        Logger.getLogger("pl.adamborowski.dcframework").setLevel(options.getFrameworkLogLevel());
 
         BaseSolver<Problem1.Params, Double> solver = new BaseSolver<>();//todo solver can be not generic - just BaseSolver using task - it doesn't require Params and Result templates
         Problem problem = new Problem1();
         solver.setup(problem, options.getNumThreads(), options.getNodeId(), options.getBatchSize());
         Double result = solver.process(Problem1.Params.of(options.getStartParameter(), options.getEndParameter()));
-        Logger.getLogger(Main.class).info("Result: " + result);
-
+        System.out.println(String.format("Result: %.6f", result));
     }
 }

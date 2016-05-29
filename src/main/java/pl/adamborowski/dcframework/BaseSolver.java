@@ -1,10 +1,8 @@
 package pl.adamborowski.dcframework;
 
-import org.apache.log4j.Logger;
-
 import java.util.Vector;
 
-public class BaseSolver<Params, Result> extends AbstractSolver<Params, Result> {
+public class BaseSolver<Params, Result> extends Solver<Params, Result> {
 
     private LocalQueue<Params, Result> localQueue;
     private TaskFactory<Params, Result> taskFactory;
@@ -41,9 +39,9 @@ public class BaseSolver<Params, Result> extends AbstractSolver<Params, Result> {
         public void step() throws InterruptedException {
             output.clear();
             input.clear();
-            Logger.getLogger(BaseSolver.class).info("Step");
+            log.debug("Step");
             localQueue.drainTo(input, batchSize);
-            Logger.getLogger(BaseSolver.class).info("Got " + input.size() + " elements.");
+            log.debug("Got " + input.size() + " elements.");
 
             for (Task<Params, Result> task : input) {
                 if (task.inState(Task.State.DEAD)) {
