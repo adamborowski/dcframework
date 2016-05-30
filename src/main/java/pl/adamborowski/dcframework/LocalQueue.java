@@ -29,4 +29,6 @@ public interface LocalQueue<Params, Result> {
     void drainTo(Collection<Task<Params, Result>> collection, int numTasks) throws InterruptedException;
 
     Logger log = Logger.getLogger(LocalQueue.class);
+
+    int getMaxCount();
 }

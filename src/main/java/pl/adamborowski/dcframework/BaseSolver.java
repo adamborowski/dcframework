@@ -1,5 +1,7 @@
 package pl.adamborowski.dcframework;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 
 public class BaseSolver<Params, Result> extends Solver<Params, Result> {
@@ -18,19 +20,25 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
         taskFactory = new SimpleTaskFactory<>(nodeId);
         localQueue = new SimpleLocalQueue<>();
         Task<Params, Result> rootTask = taskFactory.createTask();
-        rootTask.setup(null, null, initialParams);
+        rootTask.setup(null, null, initialParams, true);
         rootTask.setRootTask(true);
         localQueue.add(rootTask);
     }
 
+    @Override
+    public void finish() {
+        log.info("Max local queue count = " + localQueue.getMaxCount());
+    }
 
     private class Worker extends AbstractWorker {
 
         Vector<Task<Params, Result>> output;
         Vector<Task<Params, Result>> input;
+        List<Task> processedTasks = new LinkedList<>();
 
         @Override
         public void init() {
+            log.info(Thread.currentThread().getName() + " started.");
             input = new Vector<>(batchSize);
             output = new Vector<>(batchSize);
         }
@@ -44,42 +52,54 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
             log.debug("Got " + input.size() + " elements.");
 
             for (Task<Params, Result> task : input) {
-                if (task.inState(Task.State.DEAD)) {
-                    // the second node from merge
-                    task.setState(Task.State.DEAD);
-                } else if (task.rootTask && task.inState(Task.State.COMPUTED)) {
+                synchronized (task) {
+                    processedTasks.add(task);
+                    if (task.rootTask && task.inState(Task.State.COMPUTED)) {
 
-                    //this->output(common + "root task = " + to_string(task->result));
-                    task.setState(Task.State.DEAD);
-                    complete(task.getResult());
-                    //this is the root node = we just have the final result
-                } else if (task.inState(Task.State.AWAITING)) {
-                    //this node need's calculation or has to be divided
-                    if (problem.testDivide(task.params)) {
-                        //this->output(common + "divide");
-                        // divide task into smaller tasks and push to queue
-                        final Problem.DividedParams<Params> dividedParams = problem.divide(task.params);
-                        final Task<Params, Result> leftTask = taskFactory.createTask();
-                        final Task<Params, Result> rightTask = taskFactory.createTask();
-                        leftTask.setup(task, rightTask, dividedParams.leftParams);
-                        rightTask.setup(task, leftTask, dividedParams.rightParams);
+                        //this->output(common + "root task = " + to_string(task->result));
+                        task.setState(Task.State.DEAD);
+                        complete(task.getResult());
+                        //this is the root node = we just have the final result
+                    } else if (task.inState(Task.State.AWAITING)) {
+                        //this node need's calculation or has to be divided
+                        if (problem.testDivide(task.params)) {
+                            //this->output(common + "divide");
+                            // divide task into smaller tasks and push to queue
+                            final Problem.DividedParams<Params> dividedParams = problem.divide(task.params);
+                            final Task<Params, Result> leftTask = taskFactory.createTask();
+                            final Task<Params, Result> rightTask = taskFactory.createTask();
+                            leftTask.setup(task, rightTask, dividedParams.leftParams, true);
+                            rightTask.setup(task, leftTask, dividedParams.rightParams, false);
 
-                        output.add(leftTask);
-                        output.add(rightTask);
+                            output.add(leftTask);
+                            output.add(rightTask);
+                        } else {
+                            task.setComputed(problem.compute(task.params));
+                            output.add(task);
+                        }
+                    } else if (task.inState(Task.State.COMPUTED)) {
+                        if (task.isLeft()) {
+                            if (task.readyToMerge()) {
+                                synchronized (task.getBrother()) {
+                                    final Task<Params, Result> parent = task.getParent();
+                                    Result leftResult = task.getResult();
+                                    Result rightResult = task.getBrother().getResult();
+                                    log.debug(leftResult.toString() + ", " + rightResult.toString());
+                                    parent.setComputed(problem.merge(leftResult, rightResult));
+                                    task.markAsDead();
+                                    task.brother.markAsDead();
+                                    output.add(parent);
+//                                }
+                                }
+                            } else {
+                                output.add(task);
+                            }
+                        } else {
+                            log.debug("Right brother computed but it doesn't manage merging.");
+                        }
                     } else {
-                        task.setComputed(problem.compute(task.params));
-                        output.add(task);
+                        assert task.inState(Task.State.DEAD);
                     }
-                } else if (task.readyToMerge()) {
-                    final Task<Params, Result> parent = task.getParent();
-                    parent.setComputed(problem.merge(task.getResult(), task.getBrother().getResult()));
-                    task.markAsDead();
-                    task.brother.markAsDead();
-                    output.add(parent);
-                } else {
-                    // task have been not processed (i.e. brother is remote) - should be returned
-                    output.add(task);
-                    assert !task.inState(Task.State.DEAD);
                 }
             }
             localQueue.addAll(output);

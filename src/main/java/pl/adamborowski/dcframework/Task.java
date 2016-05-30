@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class Task<Params, Result> {
+    @Getter
+    private boolean left;
+
     public enum State {
         AWAITING, COMPUTED, DEAD
     }
@@ -37,12 +40,14 @@ public class Task<Params, Result> {
         state = State.COMPUTED;
     }
 
-    public void setup(Task<Params, Result> parent, Task<Params, Result> brother, Params params) {
+    public void setup(Task<Params, Result> parent, Task<Params, Result> brother, Params params, boolean isLeft) {
         state = State.AWAITING;
         this.parent = parent;
         this.brother = brother;
         this.params = params;
+        this.left = isLeft;
     }
+
 
     public boolean inState(State state) {
         return this.state.equals(state);
@@ -52,6 +57,12 @@ public class Task<Params, Result> {
         return parent != null && brother != null
                 && !parent.isRemote() && !brother.isRemote()
                 && inState(State.COMPUTED) && brother.inState(State.COMPUTED);
+    }
+
+    public boolean waitingForBrotherMerge() {
+        return parent != null && brother != null
+                && !parent.isRemote()
+                && inState(State.COMPUTED) && !brother.inState(State.COMPUTED);
     }
 
     public void markAsDead() {

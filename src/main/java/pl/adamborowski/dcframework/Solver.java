@@ -33,6 +33,7 @@ public abstract class Solver<Params, Result> {
     private List<Thread> workers = new LinkedList<>();
 
     protected void complete(Result result) {
+        log.info(Thread.currentThread().getName() + " finished with result " + result.toString());
         this.result = result;
         working = false;
         for (Thread worker : workers) {
@@ -46,7 +47,7 @@ public abstract class Solver<Params, Result> {
     public Result process(Params params) {
 
         initialParams = params;
-        log.info(String.format("Starting processing with %s threads.", numThreads));
+        log.info(String.format("Starting processing with %s threads with params = %s.", numThreads, initialParams.toString()));
         init();
         CountDownLatch latch = new CountDownLatch(numThreads);
         for (int i = 0; i < numThreads; i++) {
@@ -63,11 +64,14 @@ public abstract class Solver<Params, Result> {
             //todo check if his will be fired if worker will be interrupped because another worker will set the result
             //todo here will be infinity blocked at queue.pick...
         }
+        finish();
         return result;
 
     }
 
     protected abstract void init();
+
+    protected abstract void finish();
 
     abstract class AbstractWorker implements Runnable {
         @Setter
@@ -82,6 +86,7 @@ public abstract class Solver<Params, Result> {
                     step();
                 } catch (InterruptedException e) {
 //                    Throwables.propagate(e);
+                    log.info("Thread " + Thread.currentThread().getName() + " interrupted.");
                     // TODO: 29.05.2016 check if this case always means that another thread finished the job and there is no point to wait for a task
                 }
             }

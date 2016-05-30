@@ -54,5 +54,10 @@ class Problem1 implements Problem<Problem1.Params, Double> {
         double middle() {
             return (a + b) / 2;
         }
+
+        @Override
+        public String toString() {
+            return "[" + a + ", " + b + ']';
+        }
     }
 }
