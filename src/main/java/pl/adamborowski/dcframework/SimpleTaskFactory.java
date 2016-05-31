@@ -8,7 +8,7 @@ public class SimpleTaskFactory<Params, Result> implements TaskFactory<Params, Re
 
     private final int nodeId;
 
-    public Task<Params, Result> createTask() {
+    public synchronized Task<Params, Result> createTask() {
         return new Task<>(nodeId);
     }
 }

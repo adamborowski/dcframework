@@ -84,12 +84,15 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
                                     final Task<Params, Result> parent = task.getParent();
                                     Result leftResult = task.getResult();
                                     Result rightResult = task.getBrother().getResult();
+                                    if (rightResult == null) {
+                                        System.out.println("FAIL, result=null");
+                                        System.exit(111);
+                                    }
                                     log.debug(leftResult.toString() + ", " + rightResult.toString());
                                     parent.setComputed(problem.merge(leftResult, rightResult));
                                     task.markAsDead();
                                     task.brother.markAsDead();
                                     output.add(parent);
-//                                }
                                 }
                             } else {
                                 output.add(task);
