@@ -47,7 +47,7 @@ public abstract class Solver<Params, Result> {
     public Result process(Params params) {
 
         initialParams = params;
-        log.info(String.format("Starting processing with %s threads with params = %s.", numThreads, initialParams.toString()));
+        log.info(String.format("Node %s started processing with %s threads with params = %s.", nodeId, numThreads, initialParams.toString()));
         init();
         CountDownLatch latch = new CountDownLatch(numThreads);
         for (int i = 0; i < numThreads; i++) {

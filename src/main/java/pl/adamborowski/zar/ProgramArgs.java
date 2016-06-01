@@ -15,7 +15,7 @@ public class ProgramArgs {
     @Option(name = "-b", usage = "batch size", aliases = "--batch-size", metaVar = "<number>")
     private int batchSize = 10;
     @Option(name = "-i", usage = "node id", aliases = "--node-id", metaVar = "<number>")
-    private int nodeId = 1;
+    private int nodeId = 0;
 
     @Option(name = "-l", usage = "framework log level", aliases = "--framework-log-level", metaVar = "<TRACE|DEBUG|INFO|WARN|ERROR|FATAL|ALL>")
     public void setFrameworkLogLevel(String level) {

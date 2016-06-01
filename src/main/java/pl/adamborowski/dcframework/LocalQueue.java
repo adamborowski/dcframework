@@ -31,4 +31,6 @@ public interface LocalQueue<Params, Result> {
     Logger log = Logger.getLogger(LocalQueue.class);
 
     int getMaxCount();
+
+    int size();
 }

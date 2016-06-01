@@ -19,10 +19,15 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
     protected void init() {
         taskFactory = new SimpleTaskFactory<>(nodeId);
         localQueue = new SimpleLocalQueue<>();
-        Task<Params, Result> rootTask = taskFactory.createTask();
-        rootTask.setup(null, null, initialParams, true);
-        rootTask.setRootTask(true);
-        localQueue.add(rootTask);
+
+        if (nodeId == 0) {
+            Task<Params, Result> rootTask = taskFactory.createTask();
+            rootTask.setup(null, null, initialParams, true);
+            rootTask.setRootTask(true);
+            localQueue.add(rootTask);
+        } else {
+            // slave will wait to queue become not empty
+        }
     }
 
     @Override
@@ -110,7 +115,6 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
 
         @Override
         public void finish() {
-
         }
     }
 }
