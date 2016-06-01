@@ -21,9 +21,7 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
         localQueue = new SimpleLocalQueue<>();
 
         if (nodeId == 0) {
-            Task<Params, Result> rootTask = taskFactory.createTask();
-            rootTask.setup(null, null, initialParams, true);
-            rootTask.setRootTask(true);
+            Task<Params, Result> rootTask = taskFactory.createRootTask(initialParams);
             localQueue.add(rootTask);
         } else {
             // slave will wait to queue become not empty
@@ -59,7 +57,7 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
             for (Task<Params, Result> task : input) {
                 synchronized (task) {
                     processedTasks.add(task);
-                    if (task.rootTask && task.inState(Task.State.COMPUTED)) {
+                    if (task.isRootTask() && task.inState(Task.State.COMPUTED)) {
 
                         //this->output(common + "root task = " + to_string(task->result));
                         task.setState(Task.State.DEAD);
@@ -67,19 +65,20 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
                         //this is the root node = we just have the final result
                     } else if (task.inState(Task.State.AWAITING)) {
                         //this node need's calculation or has to be divided
-                        if (problem.testDivide(task.params)) {
+                        if (problem.testDivide(task.getParams())) {
                             //this->output(common + "divide");
                             // divide task into smaller tasks and push to queue
-                            final Problem.DividedParams<Params> dividedParams = problem.divide(task.params);
-                            final Task<Params, Result> leftTask = taskFactory.createTask();
-                            final Task<Params, Result> rightTask = taskFactory.createTask();
-                            leftTask.setup(task, rightTask, dividedParams.leftParams, true);
-                            rightTask.setup(task, leftTask, dividedParams.rightParams, false);
+                            final Problem.DividedParams<Params> dividedParams = problem.divide(task.getParams());
+                            final Task<Params, Result> leftTask = taskFactory.createChildTask(dividedParams.leftParams, true);
+                            final Task<Params, Result> rightTask = taskFactory.createChildTask(dividedParams.rightParams, false);
+
+                            leftTask.wire(task, rightTask);
+                            rightTask.wire(task, leftTask);
 
                             output.add(leftTask);
                             output.add(rightTask);
                         } else {
-                            task.setComputed(problem.compute(task.params));
+                            task.setComputed(problem.compute(task.getParams()), nodeId);
                             output.add(task);
                         }
                     } else if (task.inState(Task.State.COMPUTED)) {
@@ -94,9 +93,9 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
                                         System.exit(111);
                                     }
                                     log.debug(leftResult.toString() + ", " + rightResult.toString());
-                                    parent.setComputed(problem.merge(leftResult, rightResult));
+                                    parent.setComputed(problem.merge(leftResult, rightResult), nodeId);
                                     task.markAsDead();
-                                    task.brother.markAsDead();
+                                    task.getBrother().markAsDead();
                                     output.add(parent);
                                 }
                             } else {

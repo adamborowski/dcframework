@@ -1,51 +1,53 @@
 package pl.adamborowski.dcframework;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import pl.adamborowski.dcframework.api.GlobalId;
 
+@RequiredArgsConstructor
 public class Task<Params, Result> {
-    @Getter
-    private boolean left;
-
     public enum State {
         AWAITING, COMPUTED, DEAD
     }
 
     @Getter
-    Params params = null;
+    private final GlobalId globalId;
     @Getter
-    private Result result = null;
+    private final Params params;
     @Getter
-    private final int nativeNode;
+    private final boolean left; // left task reference (in divide&conquer tree) if this is not a delegate
+    @Getter
+    private final boolean rootTask;
+    @Getter
+    private final boolean delegate;// A flag indicating if this Task instance is a remote delegate for task created by another unit
 
-    public Task(int nativeNode) {
-        this.nativeNode = nativeNode;
-    }
+    @Getter
+    private Task<Params, Result> brother;
+    @Getter
+    private Task<Params, Result> parent;
 
+    @Getter
+    private int computingNodeId;
+    @Getter
+    private Result result;
     @Setter
-    private State state = null;
-    @Getter
-    Task<Params, Result> parent = null; // if null and state==done - finish program
-    @Getter
-    Task<Params, Result> brother = null;
-    @Getter
-    boolean remote = false;
+    private State state = State.AWAITING;
 
-    @Getter
-    @Setter
-    boolean rootTask = false;
 
-    public void setComputed(Result result) {
+    /**
+     * @param result          result data to be stored as a result of computation for task parameters
+     * @param computingNodeId id of node whch computed this task
+     */
+    public void setComputed(Result result, int computingNodeId) {
         this.result = result;
         state = State.COMPUTED;
+        this.computingNodeId = computingNodeId;
     }
 
-    public void setup(Task<Params, Result> parent, Task<Params, Result> brother, Params params, boolean isLeft) {
-        state = State.AWAITING;
+    public void wire(Task<Params, Result> parent, Task<Params, Result> brother) {
         this.parent = parent;
         this.brother = brother;
-        this.params = params;
-        this.left = isLeft;
     }
 
 
@@ -55,16 +57,11 @@ public class Task<Params, Result> {
 
     public boolean readyToMerge() {
         return parent != null && brother != null
-                && !parent.isRemote() && !brother.isRemote()
+                && !parent.isDelegate() && !brother.isDelegate()
                 && inState(State.COMPUTED) && brother.inState(State.COMPUTED)
                 && result != null && brother.getResult() != null;
     }
 
-    public boolean waitingForBrotherMerge() {
-        return parent != null && brother != null
-                && !parent.isRemote()
-                && inState(State.COMPUTED) && !brother.inState(State.COMPUTED);
-    }
 
     public void markAsDead() {
         state = State.DEAD;

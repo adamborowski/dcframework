@@ -1,5 +1,9 @@
 package pl.adamborowski.dcframework;
 
+import pl.adamborowski.dcframework.api.GlobalId;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class SimpleTaskFactory<Params, Result> implements TaskFactory<Params, Result> {
 
     public SimpleTaskFactory(int nodeId) {
@@ -7,9 +11,25 @@ public class SimpleTaskFactory<Params, Result> implements TaskFactory<Params, Re
     }
 
     private final int nodeId;
-    private int lastId;
+    private AtomicInteger lastId = new AtomicInteger(0);
 
-    public synchronized Task<Params, Result> createTask() {
-        return new Task<>(nodeId);
+    @Override
+    public Task<Params, Result> createRootTask(Params params) {
+        return new Task<>(createGlobalId(), params, true, true, false);
     }
+
+    private GlobalId createGlobalId() {
+        return new GlobalId(nodeId, lastId.getAndAdd(1));
+    }
+
+    @Override
+    public Task<Params, Result> createChildTask(Params params, boolean isLeft) {
+        return new Task<>(createGlobalId(), params, isLeft, false, false);
+    }
+
+    @Override
+    public Task<Params, Result> createDelegatingTask(Params params, GlobalId globalId) {
+        return new Task<>(globalId, params, false, false, true);
+    }
+
 }
