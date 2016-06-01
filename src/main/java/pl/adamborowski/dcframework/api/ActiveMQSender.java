@@ -3,6 +3,7 @@ package pl.adamborowski.dcframework.api;
 import org.apache.log4j.Logger;
 import pl.adamborowski.dcframework.comm.data.TransferObject;
 
+import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
@@ -21,6 +22,7 @@ public class ActiveMQSender {
         this.queueName = name;
         queue = session.createQueue(name);
         producer = session.createProducer(queue);
+        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
         log = Logger.getLogger(ActiveMQSender.class);
     }
 

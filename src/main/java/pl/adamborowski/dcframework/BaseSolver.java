@@ -1,13 +1,31 @@
 package pl.adamborowski.dcframework;
 
+import com.google.common.base.Throwables;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import pl.adamborowski.dcframework.api.AddressingQueueSender;
+import pl.adamborowski.dcframework.api.GlobalQueueReceiver;
+import pl.adamborowski.dcframework.api.GlobalQueueSender;
+import pl.adamborowski.dcframework.api.OwningQueueReceiver;
+import pl.adamborowski.dcframework.comm.LocalQueueSupplier;
+import pl.adamborowski.dcframework.comm.RemoteTransferManager;
+import pl.adamborowski.dcframework.comm.SharingLocalQueue;
+import pl.adamborowski.dcframework.comm.TaskCache;
+
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.Session;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
 public class BaseSolver<Params, Result> extends Solver<Params, Result> {
 
-    private LocalQueue<Params, Result> localQueue;
+    private SharingLocalQueue<Params, Result> sharingLocalQueue;
     private TaskFactory<Params, Result> taskFactory;
+    private int randomThreshold;
+    private int maxThreshold;
+    private int minThreshold;
+    private long supplierInterval;
 
     @Override
     protected AbstractWorker createWorker() {
@@ -17,12 +35,42 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
 
     @Override
     protected void init() {
-        taskFactory = new SimpleTaskFactory<>(nodeId);
-        localQueue = new SimpleLocalQueue<>();
+        try {
+            initBroker();
+        } catch (JMSException e) {
+            log.error("Error broker initialization:", e);
+            Throwables.propagate(e);
+        }
+        performInitialTask();
+    }
 
+    private void initBroker() throws JMSException {
+        taskFactory = new SimpleTaskFactory<>(nodeId);
+
+        final LocalQueue localQueue = new SimpleLocalQueue<>();
+
+        final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        final Connection connection = factory.createConnection();
+        connection.start();
+        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+
+        final TaskCache cache = new TaskCache();
+        final GlobalQueueSender globalSender = new GlobalQueueSender(session);
+        final AddressingQueueSender addressingSender = new AddressingQueueSender(session);
+        final RemoteTransferManager transferManager = new RemoteTransferManager(nodeId, cache, localQueue, globalSender, addressingSender, taskFactory);
+        final GlobalQueueReceiver globalReceiver = new GlobalQueueReceiver(session, transferManager);
+        final OwningQueueReceiver owningQueueReceiver = new OwningQueueReceiver(session, transferManager, nodeId);
+        final LocalQueueSupplier supplier = new LocalQueueSupplier(localQueue, globalReceiver, supplierInterval, minThreshold);
+
+
+        sharingLocalQueue = new SharingLocalQueue<>(localQueue, transferManager, maxThreshold, randomThreshold);
+    }
+
+    private void performInitialTask() {
         if (nodeId == 0) {
             Task<Params, Result> rootTask = taskFactory.createRootTask(initialParams);
-            localQueue.add(rootTask);
+            sharingLocalQueue.add(rootTask);
         } else {
             // slave will wait to queue become not empty
         }
@@ -30,7 +78,7 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
 
     @Override
     public void finish() {
-        log.info("Max local queue count = " + localQueue.getMaxCount());
+        log.info("Max local queue count = " + sharingLocalQueue.getMaxCount());
     }
 
     private class Worker extends AbstractWorker {
@@ -51,7 +99,7 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
             output.clear();
             input.clear();
             log.debug("Step");
-            localQueue.drainTo(input, batchSize);
+            sharingLocalQueue.drainTo(input, batchSize);
             log.debug("Got " + input.size() + " elements.");
 
             for (Task<Params, Result> task : input) {
@@ -109,7 +157,7 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
                     }
                 }
             }
-            localQueue.addAll(output);
+            sharingLocalQueue.addAll(output);
         }
 
         @Override
