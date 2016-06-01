@@ -10,6 +10,6 @@ public class SimpleTaskFactory<Params, Result> implements TaskFactory<Params, Re
     private int lastId;
 
     public synchronized Task<Params, Result> createTask() {
-        return new Task<>(nodeId, lastId++);
+        return new Task<>(nodeId);
     }
 }
