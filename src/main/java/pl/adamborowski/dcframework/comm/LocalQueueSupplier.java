@@ -56,6 +56,7 @@ public class LocalQueueSupplier {
                     System.exit(123);
                 }
             }
+            log.info("supplier stopped");
         }
     }
 }

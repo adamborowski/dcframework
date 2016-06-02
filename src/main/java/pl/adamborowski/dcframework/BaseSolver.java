@@ -35,6 +35,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     @Setter
     private String connectionUrl;
     private LocalQueueSupplier supplier;
+    private Connection connection;
 
     @Override
     protected AbstractWorker createWorker() {
@@ -59,7 +60,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         final LocalQueue localQueue = new SimpleLocalQueue<>();
 
         final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(connectionUrl);
-        final Connection connection = factory.createConnection();
+        connection = factory.createConnection();
         connection.start();
         final Session syncSesssion = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         final Session asyncSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -92,6 +93,12 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     public void finish() {
         log.info("Max local queue count = " + sharingLocalQueue.getMaxCount());
         supplier.stop();
+        try {
+            connection.close();
+            log.info("SharingLocalQueue ActiveMQ stopped");
+        } catch (JMSException e) {
+            Throwables.propagate(e);
+        }
     }
 
     private class Worker extends AbstractWorker {
