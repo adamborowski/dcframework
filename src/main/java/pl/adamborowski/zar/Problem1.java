@@ -2,6 +2,8 @@ package pl.adamborowski.zar;
 
 import pl.adamborowski.dcframework.Problem;
 
+import java.io.Serializable;
+
 class Problem1 implements Problem<Problem1.Params, Double> {
     public Double compute(Params params) {
         return compute(params.a, params.b);
@@ -38,7 +40,7 @@ class Problem1 implements Problem<Problem1.Params, Double> {
         return d;
     }
 
-    static class Params {
+    static class Params implements Serializable {
         public double a;
         public double b;
 

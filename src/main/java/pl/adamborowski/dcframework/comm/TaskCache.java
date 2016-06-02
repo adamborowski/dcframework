@@ -3,8 +3,8 @@ package pl.adamborowski.dcframework.comm;
 import pl.adamborowski.dcframework.Task;
 import pl.adamborowski.dcframework.api.GlobalId;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Stores local reference in cache and returns the transfer objecjt.
@@ -12,7 +12,7 @@ import java.util.TreeMap;
  */
 public class TaskCache {
 
-    private final Map<GlobalId, Task> tasksByID = new TreeMap<>();
+    private final Map<GlobalId, Task> tasksByID = new HashMap<>();
 
     /**
      * put task into cache

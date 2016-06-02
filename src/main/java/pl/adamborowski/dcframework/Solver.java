@@ -5,11 +5,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-public abstract class Solver<Params, Result> {
+public abstract class Solver<Params extends Serializable, Result extends Serializable> {
 
     protected static Logger log = Logger.getLogger(Solver.class);
 

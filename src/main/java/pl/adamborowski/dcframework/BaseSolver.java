@@ -1,6 +1,7 @@
 package pl.adamborowski.dcframework;
 
 import com.google.common.base.Throwables;
+import lombok.Setter;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import pl.adamborowski.dcframework.api.AddressingQueueSender;
 import pl.adamborowski.dcframework.api.GlobalQueueReceiver;
@@ -14,18 +15,25 @@ import pl.adamborowski.dcframework.comm.TaskCache;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-public class BaseSolver<Params, Result> extends Solver<Params, Result> {
+public class BaseSolver<Params extends Serializable, Result extends Serializable> extends Solver<Params, Result> {
 
     private SharingLocalQueue<Params, Result> sharingLocalQueue;
     private TaskFactory<Params, Result> taskFactory;
+    @Setter
     private int randomThreshold;
+    @Setter
     private int maxThreshold;
+    @Setter
     private int minThreshold;
+    @Setter
     private long supplierInterval;
+    @Setter
+    private String connectionUrl;
 
     @Override
     protected AbstractWorker createWorker() {
@@ -49,7 +57,7 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
 
         final LocalQueue localQueue = new SimpleLocalQueue<>();
 
-        final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(connectionUrl);
         final Connection connection = factory.createConnection();
         connection.start();
         final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -71,6 +79,7 @@ public class BaseSolver<Params, Result> extends Solver<Params, Result> {
         if (nodeId == 0) {
             Task<Params, Result> rootTask = taskFactory.createRootTask(initialParams);
             sharingLocalQueue.add(rootTask);
+            log.info("Created root task:" + rootTask.toString());
         } else {
             // slave will wait to queue become not empty
         }

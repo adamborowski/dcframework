@@ -4,9 +4,11 @@ import com.google.common.base.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.io.Serializable;
+
 @Getter
 @AllArgsConstructor
-public class GlobalId {
+public class GlobalId implements Serializable {
     private final int nodeId;
     private final int localId;
 

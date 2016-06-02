@@ -24,5 +24,7 @@ public class ProgramArgs {
 
     private Level frameworkLogLevel = Level.WARN;
 
+    @Option(name = "-u", usage = "connection url", aliases = "--connection-url", metaVar = "<protocol>://<host>:<port>")
+    private String connectionUrl = "tcp://localhost:61616";
 
 }
