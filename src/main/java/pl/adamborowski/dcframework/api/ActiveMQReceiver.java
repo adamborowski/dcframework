@@ -19,6 +19,7 @@ public class ActiveMQReceiver {
     private final Logger log;
 
     public ActiveMQReceiver(Session session, String name) throws JMSException {
+
         this.session = session;
         this.name = name;
         queue = session.createQueue(name);
@@ -43,6 +44,8 @@ public class ActiveMQReceiver {
     }
 
     public void setTransferListener(TransferListener listener) {
+        log.warn("AMQ receiver set transfer listener for name: " + name);
+
         try {
             consumer.setMessageListener(message -> {
                 try {

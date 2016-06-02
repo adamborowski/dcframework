@@ -70,6 +70,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         final GlobalQueueReceiver globalReceiver = new GlobalQueueReceiver(session, transferManager);
         final OwningQueueReceiver owningQueueReceiver = new OwningQueueReceiver(session, transferManager, nodeId);
         final LocalQueueSupplier supplier = new LocalQueueSupplier(localQueue, globalReceiver, supplierInterval, minThreshold);
+        supplier.start();
 
 
         sharingLocalQueue = new SharingLocalQueue<>(localQueue, transferManager, maxThreshold, randomThreshold);

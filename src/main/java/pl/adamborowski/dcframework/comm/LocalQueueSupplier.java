@@ -37,6 +37,7 @@ public class LocalQueueSupplier {
 
         @Override
         public void run() {
+            log.info("supplier started");
             while (running) {
                 if (shouldQueueBeBigger())
                     try {

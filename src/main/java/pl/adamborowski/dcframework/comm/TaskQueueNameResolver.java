@@ -5,7 +5,7 @@ public class TaskQueueNameResolver {
         return "queue-" + nodeId;
     }
 
-    public static String getGlobalQueueNae() {
+    public static String getGlobalQueueName() {
         return "global";
     }
 }
