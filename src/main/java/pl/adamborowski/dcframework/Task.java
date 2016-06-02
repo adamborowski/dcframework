@@ -34,6 +34,18 @@ public class Task<Params, Result> {
     @Setter
     private State state = State.AWAITING;
 
+    @Override
+    public String toString() {
+        return "Task{" +
+                (rootTask ? "root, " : "") +
+                (delegate ? "delegate, " : "") +
+                globalId +
+                " " + state +
+
+                ", params=" + params +
+                ", result=" + result +
+                '}';
+    }
 
     /**
      * @param result          result data to be stored as a result of computation for task parameters

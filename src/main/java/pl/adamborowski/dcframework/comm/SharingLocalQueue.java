@@ -23,7 +23,7 @@ public class SharingLocalQueue<Params, Result> implements LocalQueue<Params, Res
     private final LocalQueue<Params, Result> localQueue;
     private final RemoteTransferManager transferManager;
     private final int maxThreshold;
-    private final int randomThreshold;
+    private final float randomThreshold;
 
     @Override
     public void addAll(Collection<Task<Params, Result>> tasks) {
@@ -64,7 +64,8 @@ public class SharingLocalQueue<Params, Result> implements LocalQueue<Params, Res
 
 
     private boolean shouldBeSmaller() {
-        return size() > maxThreshold;
+        return true;
+//        return size() > maxThreshold;
     }
 
     @Override

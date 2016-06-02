@@ -29,6 +29,6 @@ public class GlobalId implements Serializable {
 
     @Override
     public String toString() {
-        return "#" + localId + "@" + nodeId;
+        return "@" + nodeId + "." + localId;
     }
 }

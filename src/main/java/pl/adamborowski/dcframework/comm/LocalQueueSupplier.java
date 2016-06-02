@@ -30,7 +30,9 @@ public class LocalQueueSupplier {
     }
 
     private boolean shouldQueueBeBigger() {
-        return localQueue.size() < minThreshold;
+        return true;
+//        log.debug(String.format("Checking local queue if size < minThreshold: %s < %s", localQueue.size(), minThreshold));
+//        return localQueue.size() < minThreshold;
     }
 
     private class Supplier implements Runnable {
@@ -41,14 +43,17 @@ public class LocalQueueSupplier {
             while (running) {
                 if (shouldQueueBeBigger())
                     try {
+                        log.debug("receive task to supply in " + checkInterval + "ms");
                         receiver.receiveTask(checkInterval);
                     } catch (JMSException e) {
                         log.error("Supplier can't receive global task: ", e);
+                        System.exit(123);
                     }
                 try {
                     Thread.sleep(checkInterval);
                 } catch (InterruptedException e) {
                     log.error("Supplier interrupted during working", e);
+                    System.exit(123);
                 }
             }
         }

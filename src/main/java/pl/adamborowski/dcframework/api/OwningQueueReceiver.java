@@ -14,14 +14,14 @@ public class OwningQueueReceiver {
 
     private final RemoteTransferManager transferManager;
     private final Session session;
-    private final ActiveMQReceiver receiver;
+    private final ActiveMQListener receiver;
     private final int nodeId;
 
     public OwningQueueReceiver(Session session, RemoteTransferManager transferManager, int nodeId) throws JMSException {
         this.session = session;
         this.transferManager = transferManager;
         this.nodeId = nodeId;
-        receiver = new ActiveMQReceiver(session, TaskQueueNameResolver.getQueueNameFor(nodeId));
+        receiver = new ActiveMQListener(session, TaskQueueNameResolver.getQueueNameFor(nodeId));
         receiver.setTransferListener(transfer -> transferManager.remoteToLocal((TaskComputedTO) transfer));
     }
 }

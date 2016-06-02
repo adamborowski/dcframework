@@ -25,15 +25,16 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     private SharingLocalQueue<Params, Result> sharingLocalQueue;
     private TaskFactory<Params, Result> taskFactory;
     @Setter
-    private int randomThreshold;
+    private float randomThreshold = 0.5f;
     @Setter
-    private int maxThreshold;
+    private int maxThreshold = 0;// todo change to 20000
     @Setter
-    private int minThreshold;
+    private int minThreshold = 20;//todo change to 10000
     @Setter
-    private long supplierInterval;
+    private long supplierInterval = 1000;
     @Setter
     private String connectionUrl;
+    private LocalQueueSupplier supplier;
 
     @Override
     protected AbstractWorker createWorker() {
@@ -60,16 +61,17 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(connectionUrl);
         final Connection connection = factory.createConnection();
         connection.start();
-        final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        final Session syncSesssion = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        final Session asyncSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
 
         final TaskCache cache = new TaskCache();
-        final GlobalQueueSender globalSender = new GlobalQueueSender(session);
-        final AddressingQueueSender addressingSender = new AddressingQueueSender(session);
+        final GlobalQueueSender globalSender = new GlobalQueueSender(syncSesssion);
+        final AddressingQueueSender addressingSender = new AddressingQueueSender(syncSesssion);
         final RemoteTransferManager transferManager = new RemoteTransferManager(nodeId, cache, localQueue, globalSender, addressingSender, taskFactory);
-        final GlobalQueueReceiver globalReceiver = new GlobalQueueReceiver(session, transferManager);
-        final OwningQueueReceiver owningQueueReceiver = new OwningQueueReceiver(session, transferManager, nodeId);
-        final LocalQueueSupplier supplier = new LocalQueueSupplier(localQueue, globalReceiver, supplierInterval, minThreshold);
+        final GlobalQueueReceiver globalReceiver = new GlobalQueueReceiver(asyncSession, transferManager);
+        final OwningQueueReceiver owningQueueReceiver = new OwningQueueReceiver(syncSesssion, transferManager, nodeId);
+        supplier = new LocalQueueSupplier(localQueue, globalReceiver, supplierInterval, minThreshold);
         supplier.start();
 
 
@@ -89,6 +91,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     @Override
     public void finish() {
         log.info("Max local queue count = " + sharingLocalQueue.getMaxCount());
+        supplier.stop();
     }
 
     private class Worker extends AbstractWorker {
@@ -115,6 +118,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
             for (Task<Params, Result> task : input) {
                 synchronized (task) {
                     processedTasks.add(task);
+                    log.trace("Processing task" + task);
                     if (task.isRootTask() && task.inState(Task.State.COMPUTED)) {
 
                         //this->output(common + "root task = " + to_string(task->result));
@@ -157,6 +161,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
                                     output.add(parent);
                                 }
                             } else {
+                                log.debug(String.format("Task %s is not ready to merge", task));
                                 output.add(task);
                             }
                         } else {

@@ -1,5 +1,6 @@
 package pl.adamborowski.dcframework.api;
 
+import org.apache.log4j.Logger;
 import pl.adamborowski.dcframework.comm.RemoteTransferManager;
 import pl.adamborowski.dcframework.comm.TaskQueueNameResolver;
 import pl.adamborowski.dcframework.comm.data.TaskToComputeTO;
@@ -12,6 +13,7 @@ public class GlobalQueueReceiver {
     private final RemoteTransferManager transferManager;
     private final Session session;
     private final ActiveMQReceiver receiver;
+    private final Logger log = Logger.getLogger(GlobalQueueReceiver.class);
 
     public GlobalQueueReceiver(Session session, RemoteTransferManager transferManager) throws JMSException {
         this.session = session;
@@ -21,6 +23,10 @@ public class GlobalQueueReceiver {
 
     public void receiveTask(long timeout) throws JMSException {
         TaskToComputeTO transfer = (TaskToComputeTO) receiver.receive(timeout);
-        transferManager.remoteToLocal(transfer);
+        if (transfer == null) {
+            log.debug("Could not get any task from global queue - propably is empty");
+        } else {
+            transferManager.remoteToLocal(transfer);
+        }
     }
 }

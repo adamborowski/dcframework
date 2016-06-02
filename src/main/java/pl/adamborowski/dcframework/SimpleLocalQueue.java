@@ -22,6 +22,7 @@ public class SimpleLocalQueue<Params, Result> implements LocalQueue<Params, Resu
     @Override
     public void addAll(Collection<Task<Params, Result>> collection) {
         writeLock.lock();
+        log.trace(String.format("adding tasks %s to collection of size %s", collection, size()));
         queue.addAll(collection);
         currentSize.addAndGet(collection.size());
         maxCount = Math.max(maxCount, size());
@@ -30,6 +31,7 @@ public class SimpleLocalQueue<Params, Result> implements LocalQueue<Params, Resu
 
     @Override
     public void add(Task<Params, Result> task) {
+        log.trace(String.format("adding task %s to collection of size %s", task, size()));
         queue.add(task);
         currentSize.incrementAndGet();
     }

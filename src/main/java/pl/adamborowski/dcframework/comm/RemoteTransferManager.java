@@ -1,6 +1,7 @@
 package pl.adamborowski.dcframework.comm;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.log4j.Logger;
 import pl.adamborowski.dcframework.LocalQueue;
 import pl.adamborowski.dcframework.Task;
 import pl.adamborowski.dcframework.TaskFactory;
@@ -22,6 +23,7 @@ public class RemoteTransferManager {
     private final GlobalQueueSender globalSender;
     private final AddressingQueueSender addressingSender;
     private final TaskFactory taskFactory;
+    private final Logger log = Logger.getLogger(RemoteTransferManager.class);
 
     /**
      * Called by GlobalQueueReceiver when a task to compute was received.
@@ -29,6 +31,7 @@ public class RemoteTransferManager {
      * @param transfer a task parameters to compute locally
      */
     public void remoteToLocal(TaskToComputeTO transfer) {
+        log.debug(String.format("Received remote to local %s", transfer));
         final Task delegatedTask = taskFactory.createDelegatingTask(transfer.getParams(), transfer.getGlobalId());
         localQueue.add(delegatedTask);
     }
@@ -40,6 +43,7 @@ public class RemoteTransferManager {
      */
     @SuppressWarnings("unchecked")
     public void remoteToLocal(TaskComputedTO transfer) {
+        log.debug(String.format("Received remote to local %s", transfer));
         final Task parkedTask = cache.retrieve(transfer.getGlobalId());
         parkedTask.setComputed(transfer.getResult(), transfer.getComputingNodeId());
         localQueue.add(parkedTask);
@@ -56,6 +60,7 @@ public class RemoteTransferManager {
         assert task.isDelegate();
         assert task.inState(Task.State.COMPUTED);
         TaskComputedTO transfer = new TaskComputedTO(task.getGlobalId(), nodeId, task.getResult());
+        log.debug(String.format("Send local delegate %s to owning remote %s", task, transfer));
         addressingSender.send(transfer);
     }
 
@@ -69,6 +74,7 @@ public class RemoteTransferManager {
         assert task.inState(Task.State.AWAITING);
         cache.park(task);
         TaskToComputeTO transfer = new TaskToComputeTO(task.getGlobalId(), task.getParams());
+        log.debug(String.format("Send local native %s to delegate remote %s", task, transfer));
         globalSender.send(transfer);
     }
 
