@@ -33,9 +33,8 @@ public class LocalQueueSupplier {
     }
 
     private boolean shouldQueueBeBigger() {
-        return true;
 //        log.debug(String.format("Checking local queue if size < minThreshold: %s < %s", localQueue.size(), minThreshold));
-//        return localQueue.size() < minThreshold;
+        return localQueue.size() < minThreshold;
     }
 
     private class Supplier implements Runnable {

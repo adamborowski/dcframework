@@ -8,5 +8,5 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 public class ShutdownMessage<Result> implements Serializable {
-    public final Result result;
+    private final Result result;
 }

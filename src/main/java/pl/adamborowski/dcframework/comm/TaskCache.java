@@ -19,7 +19,7 @@ public class TaskCache {
      *
      * @param task
      */
-    public void park(Task task) {
+    public synchronized void park(Task task) {
         tasksByID.put(task.getGlobalId(), task);
     }
 
@@ -29,7 +29,7 @@ public class TaskCache {
      * @param globalId
      * @return
      */
-    public Task retrieve(final GlobalId globalId) {
+    public synchronized Task retrieve(final GlobalId globalId) {
         return tasksByID.remove(globalId);
     }
 

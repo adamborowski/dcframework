@@ -7,6 +7,9 @@ import pl.adamborowski.dcframework.Task;
 
 import javax.jms.JMSException;
 import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Advanced local queue which
@@ -59,18 +62,30 @@ public class SharingLocalQueue<Params, Result> implements LocalQueue<Params, Res
     }
 
     private boolean randomYes() {
-        return true;
-//        return Math.random() > randomThreshold;
+        return Math.random() > randomThreshold;
     }
 
 
     private boolean shouldBeSmaller() {
-        return true;//return size() > maxThreshold;
+        return size() > maxThreshold;
     }
 
     @Override
     public void drainTo(Collection<Task<Params, Result>> collection, int numTasks) throws InterruptedException {
-        localQueue.drainTo(collection, numTasks);
+        if (localQueue.size() == 0) {
+            for (int i = 0; i < numTasks; i++) {
+                try {
+                    collection.add(notReadyTasks.remove());
+                } catch (NoSuchElementException e) {
+                    // if no element, we have to block on localQueue to prevent finishing the program
+                    localQueue.drainTo(collection, numTasks);
+                    break;
+                }
+            }
+        } else {
+            localQueue.drainTo(collection, numTasks);
+        }
+
     }
 
     @Override
@@ -81,5 +96,11 @@ public class SharingLocalQueue<Params, Result> implements LocalQueue<Params, Res
     @Override
     public int size() {
         return localQueue.size();
+    }
+
+    private Queue<Task> notReadyTasks = new ConcurrentLinkedQueue<>();
+
+    public void putForLater(Task<Params, Result> task) {
+        notReadyTasks.add(task);
     }
 }

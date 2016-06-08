@@ -45,6 +45,10 @@ public class RemoteTransferManager {
     public void remoteToLocal(TaskComputedTO transfer) {
         log.debug(String.format("Received remote to local %s", transfer));
         final Task parkedTask = cache.retrieve(transfer.getGlobalId());
+        if (parkedTask == null) {
+            log.error("Cannot find parked task for transfer " + transfer.toString());
+            System.exit(432);
+        }
         parkedTask.setComputed(transfer.getResult(), transfer.getComputingNodeId());
         localQueue.add(parkedTask);
 

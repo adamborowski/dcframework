@@ -12,6 +12,7 @@ import pl.adamborowski.dcframework.comm.LocalQueueSupplier;
 import pl.adamborowski.dcframework.comm.RemoteTransferManager;
 import pl.adamborowski.dcframework.comm.SharingLocalQueue;
 import pl.adamborowski.dcframework.comm.TaskCache;
+import pl.adamborowski.dcframework.comm.data.ShutdownMessage;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -19,9 +20,8 @@ import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.Topic;
 import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BaseSolver<Params extends Serializable, Result extends Serializable> extends Solver<Params, Result> {
 
@@ -30,9 +30,9 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     @Setter
     private float randomThreshold = 0.5f;
     @Setter
-    private int maxThreshold = Integer.MAX_VALUE;// todo change to 20000
+    private int maxThreshold = 700;
     @Setter
-    private int minThreshold = 0;//todo change to 10000
+    private int minThreshold = 300;
     @Setter
     private long supplierInterval = 1000;
     @Setter
@@ -48,6 +48,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         return new Worker();
     }
 
+    AtomicInteger taskCounter = new AtomicInteger(0);
 
     @Override
     protected void init() {
@@ -89,7 +90,8 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
             syncSesssion.createConsumer(finish).setMessageListener(message -> {
                 try {
                     log.info("Got FINISH signal with result from the master");
-                    this.complete((Result) ((ObjectMessage) message).getObject());
+                    ShutdownMessage<Result> message1 = (ShutdownMessage<Result>) ((ObjectMessage) message).getObject();
+                    this.complete(message1.getResult());
                 } catch (JMSException e) {
                     Throwables.propagate(e);
                 }
@@ -109,14 +111,15 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
 
     @Override
     public void finish(Result result) {
-        log.info("Max local queue count = " + sharingLocalQueue.getMaxCount());
+        log.info("Node " + nodeId + " processed " + taskCounter + " tasks");
+
         supplier.stop();
         if (nodeId == 0) {
             try {
                 Topic finish = syncSesssion.createTopic("finish");
 
                 ActiveMQObjectMessage message = new ActiveMQObjectMessage();
-                message.setObject(result);
+                message.setObject(new ShutdownMessage<>(result));
                 syncSesssion.createProducer(finish).send(message);
 
             } catch (JMSException e) {
@@ -135,7 +138,6 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
 
         Vector<Task<Params, Result>> output;
         Vector<Task<Params, Result>> input;
-        List<Task> processedTasks = new LinkedList<>();
 
         @Override
         public void init() {
@@ -153,8 +155,8 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
 //            log.debug("Got " + input.size() + " elements.");
 
             for (Task<Params, Result> task : input) {
+                taskCounter.incrementAndGet();
                 synchronized (task) {
-                    processedTasks.add(task);
                     log.debug("Processing task" + task);
                     if (task.isRootTask() && task.inState(Task.State.COMPUTED)) {
 
@@ -200,7 +202,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
                                 }
                             } else {
                                 log.debug(String.format("Task %s is not ready to merge", task));
-                                output.add(task);
+                                sharingLocalQueue.putForLater(task);
                             }
                         } else {
                             log.debug("Right brother computed but it doesn't manage merging.");
