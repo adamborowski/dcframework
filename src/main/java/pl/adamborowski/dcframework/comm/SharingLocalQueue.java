@@ -59,14 +59,12 @@ public class SharingLocalQueue<Params, Result> implements LocalQueue<Params, Res
     }
 
     private boolean randomYes() {
-        return false;
-//        return Math.random() > randomThreshold;
+        return Math.random() > randomThreshold;
     }
 
 
     private boolean shouldBeSmaller() {
-        return true;
-//        return size() > maxThreshold;
+        return size() > maxThreshold;
     }
 
     @Override
