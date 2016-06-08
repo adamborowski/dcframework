@@ -68,8 +68,8 @@ public class Task<Params, Result> {
     }
 
     public boolean readyToMerge() {
-        return parent != null && brother != null
-                && !parent.isDelegate() && !brother.isDelegate()
+        return  brother != null
+                && !brother.isDelegate()
                 && inState(State.COMPUTED) && brother.inState(State.COMPUTED)
                 && result != null && brother.getResult() != null;
     }

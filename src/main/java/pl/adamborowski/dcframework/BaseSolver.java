@@ -3,6 +3,7 @@ package pl.adamborowski.dcframework;
 import com.google.common.base.Throwables;
 import lombok.Setter;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.command.ActiveMQObjectMessage;
 import pl.adamborowski.dcframework.api.AddressingQueueSender;
 import pl.adamborowski.dcframework.api.GlobalQueueReceiver;
 import pl.adamborowski.dcframework.api.GlobalQueueSender;
@@ -14,7 +15,9 @@ import pl.adamborowski.dcframework.comm.TaskCache;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
+import javax.jms.Topic;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,15 +30,18 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     @Setter
     private float randomThreshold = 0.5f;
     @Setter
-    private int maxThreshold = 0;// todo change to 20000
+    private int maxThreshold = Integer.MAX_VALUE;// todo change to 20000
     @Setter
-    private int minThreshold = 20;//todo change to 10000
+    private int minThreshold = 0;//todo change to 10000
     @Setter
     private long supplierInterval = 1000;
+    @Setter
+    private long supplierIntervalSubsequent = 50;
     @Setter
     private String connectionUrl;
     private LocalQueueSupplier supplier;
     private Connection connection;
+    private Session syncSesssion;
 
     @Override
     protected AbstractWorker createWorker() {
@@ -62,7 +68,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(connectionUrl);
         connection = factory.createConnection();
         connection.start();
-        final Session syncSesssion = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        syncSesssion = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         final Session asyncSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
 
@@ -72,27 +78,51 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         final RemoteTransferManager transferManager = new RemoteTransferManager(nodeId, cache, localQueue, globalSender, addressingSender, taskFactory);
         final GlobalQueueReceiver globalReceiver = new GlobalQueueReceiver(asyncSession, transferManager);
         final OwningQueueReceiver owningQueueReceiver = new OwningQueueReceiver(syncSesssion, transferManager, nodeId);
-        supplier = new LocalQueueSupplier(localQueue, globalReceiver, supplierInterval, minThreshold);
+        supplier = new LocalQueueSupplier(localQueue, globalReceiver, supplierInterval, supplierIntervalSubsequent, minThreshold);
         supplier.start();
 
 
         sharingLocalQueue = new SharingLocalQueue<>(localQueue, transferManager, maxThreshold, randomThreshold);
+
+        if (nodeId != 0) {
+            Topic finish = asyncSession.createTopic("finish");
+            syncSesssion.createConsumer(finish).setMessageListener(message -> {
+                try {
+                    log.info("Got FINISH signal with result from the master");
+                    this.complete((Result) ((ObjectMessage) message).getObject());
+                } catch (JMSException e) {
+                    Throwables.propagate(e);
+                }
+            });
+        }
     }
 
     private void performInitialTask() {
         if (nodeId == 0) {
             Task<Params, Result> rootTask = taskFactory.createRootTask(initialParams);
-            sharingLocalQueue.add(rootTask);
             log.info("Created root task:" + rootTask.toString());
+            sharingLocalQueue.add(rootTask);
         } else {
             // slave will wait to queue become not empty
         }
     }
 
     @Override
-    public void finish() {
+    public void finish(Result result) {
         log.info("Max local queue count = " + sharingLocalQueue.getMaxCount());
         supplier.stop();
+        if (nodeId == 0) {
+            try {
+                Topic finish = syncSesssion.createTopic("finish");
+
+                ActiveMQObjectMessage message = new ActiveMQObjectMessage();
+                message.setObject(result);
+                syncSesssion.createProducer(finish).send(message);
+
+            } catch (JMSException e) {
+                Throwables.propagate(e);
+            }
+        }
         try {
             connection.close();
             log.info("SharingLocalQueue ActiveMQ stopped");
@@ -118,14 +148,14 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         public void step() throws InterruptedException {
             output.clear();
             input.clear();
-            log.debug("Step");
+//            log.debug("Step");
             sharingLocalQueue.drainTo(input, batchSize);
-            log.debug("Got " + input.size() + " elements.");
+//            log.debug("Got " + input.size() + " elements.");
 
             for (Task<Params, Result> task : input) {
                 synchronized (task) {
                     processedTasks.add(task);
-                    log.trace("Processing task" + task);
+                    log.debug("Processing task" + task);
                     if (task.isRootTask() && task.inState(Task.State.COMPUTED)) {
 
                         //this->output(common + "root task = " + to_string(task->result));
@@ -147,6 +177,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
                             output.add(leftTask);
                             output.add(rightTask);
                         } else {
+                            log.debug("Computing " + task.toString());
                             task.setComputed(problem.compute(task.getParams()), nodeId);
                             output.add(task);
                         }

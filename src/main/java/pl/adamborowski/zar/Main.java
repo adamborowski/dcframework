@@ -27,12 +27,17 @@ public class Main {
         }
         Logger.getLogger("pl.adamborowski.dcframework").setLevel(options.getFrameworkLogLevel());
 
-        BaseSolver<Problem1.Params, Double> solver = new BaseSolver<>();//todo solver can be not generic - just BaseSolver using task - it doesn't require Params and Result templates
-        Problem problem = new Problem1();
+
+        ActiveMQUtil.resetConnection(options);
+
+
+        BaseSolver<DummyProblem.Params, Double> solver = new BaseSolver<>();//todo solver can be not generic - just BaseSolver using task - it doesn't require Params and Result templates
+        Problem problem = new DummyProblem();
         solver.setup(problem, options.getNumThreads(), options.getNodeId(), options.getBatchSize());
         solver.setConnectionUrl(options.getConnectionUrl());
-        Double result = solver.process(Problem1.Params.of(options.getStartParameter(), options.getEndParameter()));
+        Double result = solver.process(DummyProblem.Params.of(options.getStartParameter(), options.getEndParameter()));
         System.out.println(String.format("Result: %.6f", result));
         //todo INFO severity message: computation time, other statistics
     }
+
 }

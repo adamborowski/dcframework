@@ -21,12 +21,23 @@ public class GlobalQueueReceiver {
         receiver = new ActiveMQReceiver(session, TaskQueueNameResolver.getGlobalQueueName());
     }
 
-    public void receiveTask(long timeout) throws JMSException {
+    public TaskToComputeTO receiveTask(long timeout) throws JMSException {
         TaskToComputeTO transfer = (TaskToComputeTO) receiver.receive(timeout);
+        return getTaskToComputeTO(transfer);
+    }
+
+    public TaskToComputeTO receiveTaskNoWait() throws JMSException {
+        TaskToComputeTO transfer = (TaskToComputeTO) receiver.receiveNoWait();
+        return getTaskToComputeTO(transfer);
+    }
+
+    public TaskToComputeTO getTaskToComputeTO(TaskToComputeTO transfer) {
         if (transfer == null) {
-            log.debug("Could not get any task from global queue - propably is empty");
+            log.trace("Could not get any task from global queue - propably is empty");
+            return null;
         } else {
             transferManager.remoteToLocal(transfer);
+            return transfer;
         }
     }
 }

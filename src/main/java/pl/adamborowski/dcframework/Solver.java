@@ -65,14 +65,14 @@ public abstract class Solver<Params extends Serializable, Result extends Seriali
             //todo check if his will be fired if worker will be interrupped because another worker will set the result
             //todo here will be infinity blocked at queue.pick...
         }
-        finish();
+        finish(result);
         return result;
 
     }
 
     protected abstract void init();
 
-    protected abstract void finish();
+    protected abstract void finish(Result result);
 
     abstract class AbstractWorker implements Runnable {
         @Setter
