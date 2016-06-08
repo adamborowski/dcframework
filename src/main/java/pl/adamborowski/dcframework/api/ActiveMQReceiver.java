@@ -51,8 +51,8 @@ public class ActiveMQReceiver {
         if (msg instanceof ObjectMessage) {
             ObjectMessage objectMessage = (ObjectMessage) msg;
             if (objectMessage.getObject() instanceof TransferObject) {
-                if (log.isEnabledFor(Level.DEBUG)) {
-                    log.debug(String.format("Received from %s: %s", queue.getQueueName(), objectMessage.getObject().toString()));
+                if (log.isEnabledFor(Level.TRACE)) {
+                    log.trace(String.format("Received from %s: %s", queue.getQueueName(), objectMessage.getObject().toString()));
                 }
                 return (TransferObject) objectMessage.getObject();
             }
