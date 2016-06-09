@@ -32,8 +32,12 @@ public class RemoteTransferManager {
      */
     public void remoteToLocal(TaskToComputeTO transfer) {
         log.debug(String.format("Received remote to local %s", transfer));
-        final Task delegatedTask = taskFactory.createDelegatingTask(transfer.getParams(), transfer.getGlobalId());
-        localQueue.add(delegatedTask);
+        if (transfer.getGlobalId().getNodeId() == nodeId) {
+            // this is the same node, treat as own, (nobody helped me)
+            localQueue.add(cache.retrieve(transfer.getGlobalId()));
+        } else {
+            localQueue.add(taskFactory.createDelegatingTask(transfer.getParams(), transfer.getGlobalId()));
+        }
     }
 
     /**
