@@ -17,7 +17,7 @@ public class ActiveMQUtil {
             }
             conn.destroyDestination(new ActiveMQQueue("queue-" + options.getNodeId()));
         } catch (JMSException e) {
-            Logger.getLogger(ActiveMQUtil.class).error("Cannot clear queues", e);
+            Logger.getLogger(ActiveMQUtil.class).warn("Cannot clear queues");
         } finally {
             if (conn != null) {
                 try {
