@@ -7,9 +7,9 @@ import pl.adamborowski.dcframework.config.NodeConfig;
 
 @Getter
 public class ProgramArgs {
-    @Option(name = "-s", usage = "start parameter", required = true, aliases = "--start", metaVar = "<number>")
+    @Option(name = "-s", usage = "start parameter", aliases = "--start", metaVar = "<number>")
     private double startParameter = 0;
-    @Option(name = "-e", usage = "end parameter", required = true, aliases = "--end", metaVar = "<number>")
+    @Option(name = "-e", usage = "end parameter", aliases = "--end", metaVar = "<number>")
     private double endParameter = 10;
     @Option(name = "-n", usage = "num threads", aliases = "--num-threads", metaVar = "<number>")
     private int numThreads = 1;
@@ -28,7 +28,7 @@ public class ProgramArgs {
     @Option(name = "-u", usage = "connection url", aliases = "--connection-url", metaVar = "<protocol>://<host>:<port>")
     private String connectionUrl = "tcp://localhost:61616";
 
-    public NodeConfig getConfig() {
+    public NodeConfig getNodeConfig() {
         return new NodeConfig(connectionUrl, numThreads);
     }
 }
