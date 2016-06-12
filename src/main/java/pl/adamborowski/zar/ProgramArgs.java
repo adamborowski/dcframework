@@ -3,6 +3,7 @@ package pl.adamborowski.zar;
 import lombok.Getter;
 import org.apache.log4j.Level;
 import org.kohsuke.args4j.Option;
+import pl.adamborowski.dcframework.config.NodeConfig;
 
 @Getter
 public class ProgramArgs {
@@ -27,4 +28,7 @@ public class ProgramArgs {
     @Option(name = "-u", usage = "connection url", aliases = "--connection-url", metaVar = "<protocol>://<host>:<port>")
     private String connectionUrl = "tcp://localhost:61616";
 
+    public NodeConfig getConfig() {
+        return new NodeConfig(connectionUrl, numThreads);
+    }
 }

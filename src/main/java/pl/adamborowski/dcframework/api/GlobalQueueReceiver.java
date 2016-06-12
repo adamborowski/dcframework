@@ -18,7 +18,7 @@ public class GlobalQueueReceiver {
     public GlobalQueueReceiver(Session session, RemoteTransferManager transferManager) throws JMSException {
         this.session = session;
         this.transferManager = transferManager;
-        receiver = new ActiveMQReceiver(session, TaskQueueNameResolver.getGlobalQueueName());
+        receiver = ActiveMQReceiver.forQueue(session, TaskQueueNameResolver.getGlobalQueueName());
     }
 
     public TaskToComputeTO receiveTask(long timeout) throws JMSException {

@@ -17,7 +17,7 @@ public class AddressingQueueSender {
 
     private ActiveMQSender getSender(final String name) throws JMSException {
         if (!sendersByName.containsKey(name)) {
-            sendersByName.put(name, new ActiveMQSender(session, name));
+            sendersByName.put(name, ActiveMQSender.forQueue(session, name));
         }
         return sendersByName.get(name);
     }

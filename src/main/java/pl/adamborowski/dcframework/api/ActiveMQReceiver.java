@@ -1,5 +1,6 @@
 package pl.adamborowski.dcframework.api;
 
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import pl.adamborowski.dcframework.comm.data.TransferObject;
@@ -8,24 +9,28 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.ObjectMessage;
-import javax.jms.Queue;
 import javax.jms.Session;
 
 public class ActiveMQReceiver {
-    private final Session session;
-    private final String name;
-    private final Queue queue;
     private final MessageConsumer consumer;
-    private final Logger log;
+    private final ActiveMQDestination destination;
+    private final Logger log = Logger.getLogger(ActiveMQReceiver.class);
 
-    public ActiveMQReceiver(Session session, String name) throws JMSException {
-
-        this.session = session;
-        this.name = name;
-        queue = session.createQueue(name);
-        consumer = session.createConsumer(queue);
-        log = Logger.getLogger(ActiveMQReceiver.class);
+    public ActiveMQReceiver(Session session, ActiveMQDestination destination) throws JMSException {
+        this.destination = destination;
+        consumer = session.createConsumer(destination);
     }
+
+    public static ActiveMQReceiver forQueue(Session session, String name) throws JMSException {
+        return new ActiveMQReceiver(session, (ActiveMQDestination) session.createQueue(name));
+    }
+
+    public static ActiveMQReceiver forTopic(Session session, String name) throws JMSException {
+        return new ActiveMQReceiver(session, (ActiveMQDestination) session.createTopic(name));
+    }
+
+
+
 
     public TransferObject receive(long timeout) throws JMSException {
         final Message msg = consumer.receive(timeout);
@@ -52,7 +57,7 @@ public class ActiveMQReceiver {
             ObjectMessage objectMessage = (ObjectMessage) msg;
             if (objectMessage.getObject() instanceof TransferObject) {
                 if (log.isEnabledFor(Level.TRACE)) {
-                    log.trace(String.format("Received from %s: %s", queue.getQueueName(), objectMessage.getObject().toString()));
+                    log.trace(String.format("Received from %s: %s", destination.getPhysicalName(), objectMessage.getObject().toString()));
                 }
                 return (TransferObject) objectMessage.getObject();
             }

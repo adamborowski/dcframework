@@ -10,7 +10,7 @@ public class GlobalQueueSender {
     public GlobalQueueSender(Session session) throws JMSException {
 
         this.session = session;
-        this.sender = new ActiveMQSender(session, TaskQueueNameResolver.getGlobalQueueName());
+        this.sender = ActiveMQSender.forQueue(session, TaskQueueNameResolver.getGlobalQueueName());
     }
 
     private final Session session;

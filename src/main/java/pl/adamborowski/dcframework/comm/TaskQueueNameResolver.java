@@ -8,4 +8,12 @@ public class TaskQueueNameResolver {
     public static String getGlobalQueueName() {
         return "global";
     }
+
+    public static String getConfigTopicName() {
+        return "master-config";
+    }
+
+    public static String getConfigResponseQueueName() {
+        return "queue-config-response";
+    }
 }
