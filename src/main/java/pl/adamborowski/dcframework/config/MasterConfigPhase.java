@@ -34,11 +34,15 @@ public class MasterConfigPhase {
         log.info("Send configuration to config topic");
         configTopicSender.send(new SlaveConfigMessage(nodeConfig));
         final List<Integer> slaveIds = new LinkedList<>();
+        final int nodeConfigHash = nodeConfig.hashCode();
         while (true) {
             SlaveConfigMessage.Response slaveResponse = (SlaveConfigMessage.Response) configTopicReceiver.receive(1000);
             if (slaveResponse == null) {
                 break;
             }
+//            if (!nodeConfig.equals(slaveResponse.getNodeConfig())) {
+//                throw new IllegalStateException("Config hash mismatch... " + slaveResponse.getNodeConfig() + " != " + nodeConfig);
+//            }
             slaveIds.add(slaveResponse.getNodeId());
             log.info("Got slave response from node " + slaveResponse.getNodeId());
         }

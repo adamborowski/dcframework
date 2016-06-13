@@ -13,5 +13,7 @@ public class SlaveConfigMessage implements TransferObject {
     @Getter
     public static class Response implements TransferObject {
         private final Integer nodeId;
+        private final NodeConfig nodeConfig;
+        private final int nodeConfigHash;
     }
 }

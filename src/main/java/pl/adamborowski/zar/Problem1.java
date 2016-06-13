@@ -1,5 +1,6 @@
 package pl.adamborowski.zar;
 
+import lombok.EqualsAndHashCode;
 import pl.adamborowski.dcframework.node.Problem;
 
 import java.io.Serializable;
@@ -41,9 +42,12 @@ class Problem1 implements Problem<Problem1.Params, Double> {
         return d;
     }
 
+
+    @EqualsAndHashCode
     static class Params implements Serializable {
-        public double a;
-        public double b;
+
+        public final double a;
+        public final double b;
 
         public Params(double a, double b) {
             this.a = a;

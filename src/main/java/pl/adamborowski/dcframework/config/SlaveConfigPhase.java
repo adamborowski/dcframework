@@ -31,7 +31,7 @@ public class SlaveConfigPhase {
         log.info("Receiving configuration from config topic...");
         SlaveConfigMessage configMessage = (SlaveConfigMessage) configReceiver.receive();
         log.info("Sending response to master");
-        configResponseSender.send(new SlaveConfigMessage.Response(nodeId));
+        configResponseSender.send(new SlaveConfigMessage.Response(nodeId, configMessage.getNodeConfig(), configMessage.getNodeConfig().hashCode()));
         session.close();
         return configMessage.getNodeConfig();
     }
