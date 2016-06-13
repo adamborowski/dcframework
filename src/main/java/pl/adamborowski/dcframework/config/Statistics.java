@@ -2,11 +2,13 @@ package pl.adamborowski.dcframework.config;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.io.Serializable;
 
 @RequiredArgsConstructor
 @Getter
+@ToString
 public class Statistics implements Serializable {
     private final long computationTime;
     private final long numTaskProcessed;

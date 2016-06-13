@@ -23,6 +23,7 @@ public class RemoteTransferManager {
     private final GlobalQueueSender globalSender;
     private final AddressingQueueSender addressingSender;
     private final TaskFactory taskFactory;
+    private final boolean optimizeShortReturn;
     private final Logger log = Logger.getLogger(RemoteTransferManager.class);
 
     /**
@@ -32,7 +33,7 @@ public class RemoteTransferManager {
      */
     public void remoteToLocal(TaskToComputeTO transfer) {
         log.debug(String.format("Received remote to local %s", transfer));
-        if (transfer.getGlobalId().getNodeId() == nodeId) {
+        if (transfer.getGlobalId().getNodeId() == nodeId && optimizeShortReturn) {
             // this is the same node, treat as own, (nobody helped me)
             localQueue.add(cache.retrieve(transfer.getGlobalId()));
         } else {

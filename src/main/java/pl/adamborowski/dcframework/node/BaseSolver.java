@@ -40,6 +40,8 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     private long supplierInterval = 1000;
     @Setter
     private long supplierIntervalSubsequent = 50;
+    @Setter
+    private boolean optimizeShortReturn;
     private LocalQueueSupplier supplier;
     @Setter
     private Connection connection;
@@ -85,7 +87,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         final TaskCache cache = new TaskCache();
         globalQueueSender = new GlobalQueueSender(syncSesssion);
         addressingQueueSender = new AddressingQueueSender(syncSesssion);
-        final RemoteTransferManager transferManager = new RemoteTransferManager(nodeId, cache, localQueue, globalQueueSender, addressingQueueSender, taskFactory);
+        final RemoteTransferManager transferManager = new RemoteTransferManager(nodeId, cache, localQueue, globalQueueSender, addressingQueueSender, taskFactory, optimizeShortReturn);
         globalQueueReceiver = new GlobalQueueReceiver(asyncSession, transferManager);
         owningQueueReceiver = new OwningQueueReceiver(syncSesssion, transferManager, nodeId);
         supplier = new LocalQueueSupplier(localQueue, globalQueueReceiver, supplierInterval, supplierIntervalSubsequent, minThreshold);

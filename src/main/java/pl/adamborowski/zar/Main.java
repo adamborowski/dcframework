@@ -83,9 +83,11 @@ public class Main {
                     log.error("Cannot save report", e);
                 }
             }
+            log.info("Statistics: " + statistics);
         } else {
             SlaveResultPhase slaveResultPhase = new SlaveResultPhase(connection);
             slaveResultPhase.perform(nodeId, solver.getStatistics());
+            log.info("Slave statistics: " + solver.getStatistics());
         }
 
 
@@ -102,6 +104,9 @@ public class Main {
         Problem problem = new DummyProblem();
         solver.setup(problem, nodeConfig.getNumThreads(), nodeId, nodeConfig.getBatchSize());
         solver.setConnection(connection);
+        solver.setOptimizeShortReturn(nodeConfig.isOptimizeShortReturn());
+
+
         Double result = solver.process((DummyProblem.Params) nodeConfig.getInitialParams());
         System.out.println(String.format("Result: %.6f", result));
         return solver;

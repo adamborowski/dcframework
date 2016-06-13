@@ -33,7 +33,12 @@ public class ProgramArgs {
     @Option(name="-r", usage = "report output file", aliases = "--report-output-file", metaVar = "<path to file>")
     private File reportFile;
 
+    @Option(name = "-o1", usage = "optimize: don't return delegated task to the same unit using queue", aliases = "--optimize-short-return")
+    private boolean optimizeShortReturn = false;
+    @Option(name = "-o2", usage = "optimize: send some tasks to all slaves at startup", aliases = "--optimize-initial-distribution")
+    private boolean optimizeInitialDistribution = false;
+
     public NodeConfig getNodeConfig() {
-        return new NodeConfig(numThreads, batchSize, DummyProblem.Params.of(startParameter, endParameter));
+        return new NodeConfig(numThreads, batchSize, DummyProblem.Params.of(startParameter, endParameter), optimizeShortReturn, optimizeInitialDistribution);
     }
 }

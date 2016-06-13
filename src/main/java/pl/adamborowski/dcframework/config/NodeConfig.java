@@ -13,5 +13,6 @@ public class NodeConfig<Params> implements Serializable {
     private int numThreads;
     private int batchSize;
     private Params initialParams;
-    //TODO optimization options here...
+    private boolean optimizeShortReturn;
+    private boolean optimizeInitialDistribution;
 }
