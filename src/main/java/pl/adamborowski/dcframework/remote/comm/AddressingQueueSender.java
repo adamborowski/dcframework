@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import pl.adamborowski.dcframework.remote.TaskQueueNameResolver;
 import pl.adamborowski.dcframework.remote.data.TaskComputedTO;
+import pl.adamborowski.dcframework.remote.data.TaskToComputeTO;
 import pl.adamborowski.dcframework.util.ActiveMQSender;
 
 import javax.jms.JMSException;
@@ -29,6 +30,11 @@ public class AddressingQueueSender {
     public void send(final TaskComputedTO transfer) throws JMSException {
         counter++;
         getSender(TaskQueueNameResolver.getQueueNameFor(transfer.getGlobalId().getNodeId())).send(transfer);
+    }
+
+    public void initialSend(final TaskToComputeTO transfer, int nodeId) throws JMSException {
+        counter++;
+        getSender(TaskQueueNameResolver.getQueueNameFor(nodeId)).send(transfer);
     }
 
 }

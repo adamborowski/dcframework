@@ -87,8 +87,21 @@ public class RemoteTransferManager {
         globalSender.send(transfer);
     }
 
-    private String getQueueNameForNode(final int nodeId) {
-        return "queue-" + nodeId;
+    /**
+     * Called by SharedQueue to put native task to addressing queue for others to compute at initial state
+     *
+     * @param task
+     * @param slaveId the id of slave to send
+     * @throws JMSException
+     */
+    public void initialLocalNativeToDelegateRemote(Task task, int slaveId) throws JMSException {
+        assert !task.isDelegate();
+        assert task.inState(Task.State.AWAITING);
+        cache.park(task);
+        TaskToComputeTO transfer = new TaskToComputeTO(task.getGlobalId(), task.getParams());
+        log.debug(String.format("Send initial local native %s to delegate remote %s", task, transfer));
+        addressingSender.initialSend(transfer, slaveId);
     }
+
 
 }
