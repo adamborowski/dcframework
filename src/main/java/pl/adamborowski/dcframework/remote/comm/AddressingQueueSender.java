@@ -1,5 +1,6 @@
 package pl.adamborowski.dcframework.remote.comm;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import pl.adamborowski.dcframework.remote.TaskQueueNameResolver;
 import pl.adamborowski.dcframework.remote.data.TaskComputedTO;
@@ -13,6 +14,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AddressingQueueSender {
 
+    @Getter
+    private int counter = 0;
     private final Map<String, ActiveMQSender> sendersByName = new HashMap<>();
     private final Session session;
 
@@ -24,6 +27,7 @@ public class AddressingQueueSender {
     }
 
     public void send(final TaskComputedTO transfer) throws JMSException {
+        counter++;
         getSender(TaskQueueNameResolver.getQueueNameFor(transfer.getGlobalId().getNodeId())).send(transfer);
     }
 

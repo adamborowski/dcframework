@@ -1,5 +1,6 @@
 package pl.adamborowski.dcframework.remote.comm;
 
+import lombok.Getter;
 import org.apache.log4j.Logger;
 import pl.adamborowski.dcframework.remote.RemoteTransferManager;
 import pl.adamborowski.dcframework.remote.TaskQueueNameResolver;
@@ -15,6 +16,8 @@ public class GlobalQueueReceiver {
     private final Session session;
     private final ActiveMQReceiver receiver;
     private final Logger log = Logger.getLogger(GlobalQueueReceiver.class);
+    @Getter
+    private int counter = 0;
 
     public GlobalQueueReceiver(Session session, RemoteTransferManager transferManager) throws JMSException {
         this.session = session;
@@ -37,6 +40,7 @@ public class GlobalQueueReceiver {
             log.trace("Could not get any task from global queue - propably is empty");
             return null;
         } else {
+            counter++;
             transferManager.remoteToLocal(transfer);
             return transfer;
         }

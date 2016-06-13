@@ -1,5 +1,6 @@
 package pl.adamborowski.dcframework.remote.comm;
 
+import lombok.Getter;
 import pl.adamborowski.dcframework.remote.RemoteTransferManager;
 import pl.adamborowski.dcframework.remote.TaskQueueNameResolver;
 import pl.adamborowski.dcframework.remote.data.TaskComputedTO;
@@ -17,12 +18,18 @@ public class OwningQueueReceiver {
     private final Session session;
     private final ActiveMQListener receiver;
     private final int nodeId;
+    @Getter
+    private int counter = 0;
 
     public OwningQueueReceiver(Session session, RemoteTransferManager transferManager, int nodeId) throws JMSException {
         this.session = session;
         this.transferManager = transferManager;
         this.nodeId = nodeId;
         receiver = new ActiveMQListener(session, TaskQueueNameResolver.getQueueNameFor(nodeId));
-        receiver.setTransferListener(transfer -> transferManager.remoteToLocal((TaskComputedTO) transfer));
+        receiver.setTransferListener(transfer -> {
+            counter++;
+            transferManager.remoteToLocal((TaskComputedTO) transfer);
+
+        });
     }
 }

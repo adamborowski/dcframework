@@ -3,3 +3,5 @@
 target
 *.iml
 activemq-data
+reports
+paths.txt

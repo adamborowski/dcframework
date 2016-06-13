@@ -6,14 +6,19 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.OptionHandlerFilter;
 import pl.adamborowski.dcframework.config.MasterConfigPhase;
+import pl.adamborowski.dcframework.config.MasterResultPhase;
 import pl.adamborowski.dcframework.config.NodeConfig;
 import pl.adamborowski.dcframework.config.SlaveConfigPhase;
+import pl.adamborowski.dcframework.config.SlaveResultPhase;
+import pl.adamborowski.dcframework.config.Statistics;
 import pl.adamborowski.dcframework.node.BaseSolver;
 import pl.adamborowski.dcframework.node.Problem;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
 
 public class Main {
@@ -65,14 +70,32 @@ public class Main {
             nodeConfig = slaveConfigPhase.perform(nodeId);
         }
 
-        startComputing(nodeId, connection, nodeConfig);
+        BaseSolver solver = startComputing(nodeId, connection, nodeConfig);
+
+        if (isMaster) {
+            MasterResultPhase masterResultPhase = new MasterResultPhase(connection);
+            Map<Integer, Statistics> statistics = masterResultPhase.perform(slaveIds, solver.getStatistics());
+            if (options.getReportFile() != null) {
+                ReportCreator reportCreator = new ReportCreator(nodeConfig.getInitialParams(), solver.getResult(), statistics);
+                try {
+                    reportCreator.save(options.getReportFile());
+                } catch (IOException e) {
+                    log.error("Cannot save report", e);
+                }
+            }
+        } else {
+            SlaveResultPhase slaveResultPhase = new SlaveResultPhase(connection);
+            slaveResultPhase.perform(nodeId, solver.getStatistics());
+        }
+
+
         connection.close();
         log.info("ActiveMQ connection closed");
 
 
     }
 
-    private static void startComputing(Integer nodeId, Connection connection, NodeConfig nodeConfig) {
+    private static BaseSolver startComputing(Integer nodeId, Connection connection, NodeConfig nodeConfig) {
         log.info("Node " + nodeId + " starting computing");
         log.info("Options: " + nodeConfig.toString());
         BaseSolver<DummyProblem.Params, Double> solver = new BaseSolver<>();//todo solver can be not generic - just BaseSolver using task - it doesn't require Params and Result templates
@@ -81,6 +104,7 @@ public class Main {
         solver.setConnection(connection);
         Double result = solver.process((DummyProblem.Params) nodeConfig.getInitialParams());
         System.out.println(String.format("Result: %.6f", result));
+        return solver;
     }
 
     private static Connection createConnection(ProgramArgs options) throws JMSException {

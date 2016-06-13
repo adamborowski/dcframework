@@ -1,8 +1,11 @@
 package pl.adamborowski.dcframework.node;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.activemq.command.ActiveMQObjectMessage;
+import pl.adamborowski.dcframework.config.Statistics;
 import pl.adamborowski.dcframework.remote.LocalQueueSupplier;
 import pl.adamborowski.dcframework.remote.RemoteTransferManager;
 import pl.adamborowski.dcframework.remote.SharingLocalQueue;
@@ -20,6 +23,7 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import java.io.Serializable;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BaseSolver<Params extends Serializable, Result extends Serializable> extends Solver<Params, Result> {
@@ -41,6 +45,15 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     private Connection connection;
     private Session syncSesssion;
 
+    @Getter
+    private Statistics statistics = null;
+
+    private Stopwatch stopwatch;
+    private GlobalQueueSender globalQueueSender;
+    private AddressingQueueSender addressingQueueSender;
+    private GlobalQueueReceiver globalQueueReceiver;
+    private OwningQueueReceiver owningQueueReceiver;
+
     @Override
     protected AbstractWorker createWorker() {
         return new Worker();
@@ -50,6 +63,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
 
     @Override
     protected void init() {
+        stopwatch = Stopwatch.createStarted();
         try {
             initBroker();
         } catch (JMSException e) {
@@ -69,12 +83,12 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
 
 
         final TaskCache cache = new TaskCache();
-        final GlobalQueueSender globalSender = new GlobalQueueSender(syncSesssion);
-        final AddressingQueueSender addressingSender = new AddressingQueueSender(syncSesssion);
-        final RemoteTransferManager transferManager = new RemoteTransferManager(nodeId, cache, localQueue, globalSender, addressingSender, taskFactory);
-        final GlobalQueueReceiver globalReceiver = new GlobalQueueReceiver(asyncSession, transferManager);
-        final OwningQueueReceiver owningQueueReceiver = new OwningQueueReceiver(syncSesssion, transferManager, nodeId);
-        supplier = new LocalQueueSupplier(localQueue, globalReceiver, supplierInterval, supplierIntervalSubsequent, minThreshold);
+        globalQueueSender = new GlobalQueueSender(syncSesssion);
+        addressingQueueSender = new AddressingQueueSender(syncSesssion);
+        final RemoteTransferManager transferManager = new RemoteTransferManager(nodeId, cache, localQueue, globalQueueSender, addressingQueueSender, taskFactory);
+        globalQueueReceiver = new GlobalQueueReceiver(asyncSession, transferManager);
+        owningQueueReceiver = new OwningQueueReceiver(syncSesssion, transferManager, nodeId);
+        supplier = new LocalQueueSupplier(localQueue, globalQueueReceiver, supplierInterval, supplierIntervalSubsequent, minThreshold);
         supplier.start();
 
 
@@ -106,9 +120,20 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
 
     @Override
     public void finish(Result result) {
+        stopwatch.stop();
         log.info("Node " + nodeId + " processed " + taskCounter + " tasks");
 
         supplier.stop();
+
+        statistics = new Statistics(stopwatch.elapsed(TimeUnit.MILLISECONDS),
+                taskCounter.get(),
+                globalQueueSender.getCounter(),
+                globalQueueReceiver.getCounter(),
+                addressingQueueSender.getCounter(),
+                owningQueueReceiver.getCounter());
+
+
+
         if (nodeId == 0) {
             try {
                 Topic finish = syncSesssion.createTopic("finish");

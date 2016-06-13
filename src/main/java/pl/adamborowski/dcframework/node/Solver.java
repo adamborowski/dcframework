@@ -28,6 +28,7 @@ public abstract class Solver<Params extends Serializable, Result extends Seriali
 
     @Getter
     private boolean working = true;
+    @Getter
     private Result result;
     protected Params initialParams;
 
