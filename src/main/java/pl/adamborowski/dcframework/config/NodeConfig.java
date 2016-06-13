@@ -15,4 +15,7 @@ public class NodeConfig<Params> implements Serializable {
     private Params initialParams;
     private boolean optimizeShortReturn;
     private boolean optimizeInitialDistribution;
+    private float randomThreshold;
+    private int minThreshold;
+    private int maxThreshold;
 }

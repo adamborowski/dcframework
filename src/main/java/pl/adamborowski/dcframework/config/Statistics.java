@@ -16,4 +16,5 @@ public class Statistics implements Serializable {
     private final long numTaskReceivedFromGlobal; // when localQueueSupplier gets some others tasks to compute
     private final long numTaskSentBackToCreator; // when sharing queue sends computed task to owner's queue
     private final long numTaskReceivedBackToCreator; // when owning queue receiver gets computed task to merge
+    private final long localQueueBlockTime;
 }

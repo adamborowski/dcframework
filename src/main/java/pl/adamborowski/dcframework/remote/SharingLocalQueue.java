@@ -3,6 +3,7 @@ package pl.adamborowski.dcframework.remote;
 import com.google.common.base.Throwables;
 import lombok.RequiredArgsConstructor;
 import pl.adamborowski.dcframework.node.LocalQueue;
+import pl.adamborowski.dcframework.node.SimpleLocalQueue;
 import pl.adamborowski.dcframework.node.Task;
 
 import javax.jms.JMSException;
@@ -23,10 +24,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 @RequiredArgsConstructor
 public class SharingLocalQueue<Params, Result> implements LocalQueue<Params, Result> {
-    private final LocalQueue<Params, Result> localQueue;
+    private final SimpleLocalQueue<Params, Result> localQueue;
     private final RemoteTransferManager transferManager;
     private final int maxThreshold;
     private final float randomThreshold;
+    private final boolean isMaster;
+    private final boolean optimizeInitialDistribution;
+    private final Queue<Integer> slavesToDistributeInitialTasks;
 
     @Override
     public void addAll(Collection<Task<Params, Result>> tasks) {
@@ -45,7 +49,9 @@ public class SharingLocalQueue<Params, Result> implements LocalQueue<Params, Res
                 if (task.inState(Task.State.COMPUTED)) {
                     localQueue.add(task);
                 } else {
-                    if (shouldBeSmaller()) {
+                    if (isMaster && optimizeInitialDistribution && !slavesToDistributeInitialTasks.isEmpty() && localQueue.getNumItemsEnqueued() > 20) {
+                        transferManager.initialLocalNativeToDelegateRemote(task, slavesToDistributeInitialTasks.remove());
+                    } else if (shouldBeSmaller()) {
                         if (randomYes()) {
                             transferManager.localNativeToDelegateRemote(task);
                         } else {

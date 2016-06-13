@@ -22,6 +22,7 @@ import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.Topic;
 import java.io.Serializable;
+import java.util.Queue;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,6 +43,10 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     private long supplierIntervalSubsequent = 50;
     @Setter
     private boolean optimizeShortReturn;
+    @Setter
+    private boolean optimizeInitialDistribution;
+    @Setter
+    private Queue slaveIds;
     private LocalQueueSupplier supplier;
     @Setter
     private Connection connection;
@@ -55,6 +60,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     private AddressingQueueSender addressingQueueSender;
     private GlobalQueueReceiver globalQueueReceiver;
     private OwningQueueReceiver owningQueueReceiver;
+    private SimpleLocalQueue localQueue;
 
     @Override
     protected AbstractWorker createWorker() {
@@ -78,7 +84,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     private void initBroker() throws JMSException {
         taskFactory = new SimpleTaskFactory<>(nodeId);
 
-        final LocalQueue localQueue = new SimpleLocalQueue<>();
+        localQueue = new SimpleLocalQueue<>();
 
         syncSesssion = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         final Session asyncSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -94,7 +100,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         supplier.start();
 
 
-        sharingLocalQueue = new SharingLocalQueue<>(localQueue, transferManager, maxThreshold, randomThreshold);
+        sharingLocalQueue = new SharingLocalQueue<>(localQueue, transferManager, maxThreshold, randomThreshold, nodeId == 0, optimizeInitialDistribution, slaveIds);
 
         if (nodeId != 0) {
             Topic finish = asyncSession.createTopic("finish");
@@ -132,7 +138,9 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
                 globalQueueSender.getCounter(),
                 globalQueueReceiver.getCounter(),
                 addressingQueueSender.getCounter(),
-                owningQueueReceiver.getCounter());
+                owningQueueReceiver.getCounter(),
+                localQueue.getBlockTime()
+        );
 
 
 

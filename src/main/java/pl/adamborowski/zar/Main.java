@@ -1,5 +1,6 @@
 package pl.adamborowski.zar;
 
+import com.google.common.collect.Queues;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
 import org.kohsuke.args4j.CmdLineException;
@@ -70,7 +71,7 @@ public class Main {
             nodeConfig = slaveConfigPhase.perform(nodeId);
         }
 
-        BaseSolver solver = startComputing(nodeId, connection, nodeConfig);
+        BaseSolver solver = startComputing(nodeId, connection, nodeConfig, slaveIds);
 
         if (isMaster) {
             MasterResultPhase masterResultPhase = new MasterResultPhase(connection);
@@ -97,7 +98,7 @@ public class Main {
 
     }
 
-    private static BaseSolver startComputing(Integer nodeId, Connection connection, NodeConfig nodeConfig) {
+    private static BaseSolver startComputing(Integer nodeId, Connection connection, NodeConfig nodeConfig, Collection<Integer> slaveIds) {
         log.info("Node " + nodeId + " starting computing");
         log.info("Options: " + nodeConfig.toString());
         BaseSolver<DummyProblem.Params, Double> solver = new BaseSolver<>();//todo solver can be not generic - just BaseSolver using task - it doesn't require Params and Result templates
@@ -105,6 +106,12 @@ public class Main {
         solver.setup(problem, nodeConfig.getNumThreads(), nodeId, nodeConfig.getBatchSize());
         solver.setConnection(connection);
         solver.setOptimizeShortReturn(nodeConfig.isOptimizeShortReturn());
+        solver.setOptimizeInitialDistribution(nodeConfig.isOptimizeInitialDistribution());
+        solver.setSlaveIds(slaveIds == null ? null : Queues.newArrayDeque(slaveIds));
+        solver.setRandomThreshold(nodeConfig.getRandomThreshold());
+        solver.setMinThreshold(nodeConfig.getMinThreshold());
+        solver.setMaxThreshold(nodeConfig.getMaxThreshold());
+
 
 
         Double result = solver.process((DummyProblem.Params) nodeConfig.getInitialParams());

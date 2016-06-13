@@ -99,7 +99,7 @@ public class RemoteTransferManager {
         assert task.inState(Task.State.AWAITING);
         cache.park(task);
         TaskToComputeTO transfer = new TaskToComputeTO(task.getGlobalId(), task.getParams());
-        log.debug(String.format("Send initial local native %s to delegate remote %s", task, transfer));
+        log.debug(String.format("Send initial local native %s to delegate remote %s for slave %d", task, transfer, slaveId));
         addressingSender.initialSend(transfer, slaveId);
     }
 

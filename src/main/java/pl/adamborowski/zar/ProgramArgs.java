@@ -38,7 +38,14 @@ public class ProgramArgs {
     @Option(name = "-o2", usage = "optimize: send some tasks to all slaves at startup", aliases = "--optimize-initial-distribution")
     private boolean optimizeInitialDistribution = false;
 
+    @Option(name = "-tr", usage = "random threshold", aliases = "--random-threshold", metaVar = "<number>")
+    private float randomThreshold = 0.5f;
+    @Option(name = "-ti", usage = "min threshold", aliases = "--min-threshold", metaVar = "<number>")
+    private int minThreshold = 300;
+    @Option(name = "-tx", usage = "max threshold", aliases = "--max-threshold", metaVar = "<number>")
+    private int maxThreshold = 700;
+
     public NodeConfig getNodeConfig() {
-        return new NodeConfig(numThreads, batchSize, DummyProblem.Params.of(startParameter, endParameter), optimizeShortReturn, optimizeInitialDistribution);
+        return new NodeConfig(numThreads, batchSize, DummyProblem.Params.of(startParameter, endParameter), optimizeShortReturn, optimizeInitialDistribution, randomThreshold, minThreshold, maxThreshold);
     }
 }
