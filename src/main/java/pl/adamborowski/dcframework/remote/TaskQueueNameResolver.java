@@ -16,4 +16,8 @@ public class TaskQueueNameResolver {
     public static String getConfigResponseQueueName() {
         return "queue-config-response";
     }
+
+    public static String getFinishTopicName() {
+        return "finish";
+    }
 }

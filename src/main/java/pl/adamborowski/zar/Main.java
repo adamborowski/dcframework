@@ -77,7 +77,7 @@ public class Main {
             MasterResultPhase masterResultPhase = new MasterResultPhase(connection);
             Map<Integer, Statistics> statistics = masterResultPhase.perform(slaveIds, solver.getStatistics());
             if (options.getReportFile() != null) {
-                ReportCreator reportCreator = new ReportCreator(nodeConfig.getInitialParams(), solver.getResult(), statistics);
+                ReportCreator reportCreator = new ReportCreator(nodeConfig.getInitialParams(), solver.getResult(), statistics, options);
                 try {
                     reportCreator.save(options.getReportFile());
                 } catch (IOException e) {

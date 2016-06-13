@@ -10,6 +10,7 @@ import pl.adamborowski.dcframework.remote.LocalQueueSupplier;
 import pl.adamborowski.dcframework.remote.RemoteTransferManager;
 import pl.adamborowski.dcframework.remote.SharingLocalQueue;
 import pl.adamborowski.dcframework.remote.TaskCache;
+import pl.adamborowski.dcframework.remote.TaskQueueNameResolver;
 import pl.adamborowski.dcframework.remote.comm.AddressingQueueSender;
 import pl.adamborowski.dcframework.remote.comm.GlobalQueueReceiver;
 import pl.adamborowski.dcframework.remote.comm.GlobalQueueSender;
@@ -103,7 +104,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
         sharingLocalQueue = new SharingLocalQueue<>(localQueue, transferManager, maxThreshold, randomThreshold, nodeId == 0, optimizeInitialDistribution, slaveIds);
 
         if (nodeId != 0) {
-            Topic finish = asyncSession.createTopic("finish");
+            Topic finish = asyncSession.createTopic(TaskQueueNameResolver.getFinishTopicName());
             syncSesssion.createConsumer(finish).setMessageListener(message -> {
                 try {
                     log.info("Got FINISH signal with result from the master");
@@ -146,7 +147,7 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
 
         if (nodeId == 0) {
             try {
-                Topic finish = syncSesssion.createTopic("finish");
+                Topic finish = syncSesssion.createTopic(TaskQueueNameResolver.getFinishTopicName());
 
                 ActiveMQObjectMessage message = new ActiveMQObjectMessage();
                 message.setObject(new ShutdownMessage<>(result));

@@ -4,6 +4,7 @@ import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.log4j.Logger;
+import pl.adamborowski.dcframework.remote.TaskQueueNameResolver;
 
 import javax.jms.JMSException;
 
@@ -13,7 +14,9 @@ public class ActiveMQUtil {
         try {
             conn = (ActiveMQConnection) new ActiveMQConnectionFactory(options.getConnectionUrl()).createConnection();
             if (options.getNodeId() == 0) {
-                conn.destroyDestination(new ActiveMQQueue("global"));
+                conn.destroyDestination(new ActiveMQQueue(TaskQueueNameResolver.getGlobalQueueName()));
+                conn.destroyDestination(new ActiveMQQueue(TaskQueueNameResolver.getConfigResponseQueueName()));
+                conn.destroyDestination(new ActiveMQQueue(TaskQueueNameResolver.getConfigTopicName()));
             }
             conn.destroyDestination(new ActiveMQQueue("queue-" + options.getNodeId()));
         } catch (JMSException e) {

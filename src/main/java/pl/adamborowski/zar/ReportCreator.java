@@ -17,11 +17,12 @@ public class ReportCreator<Params, Result> {
     private final Params initialParams;
     private final Result result;
     private final Map<Integer, Statistics> nodeStatistics;
+    private final ProgramArgs programArgs;
 
     public void save(File f) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setVisibility(JsonMethod.ALL, JsonAutoDetect.Visibility.ANY);
-        mapper.writeValue(f, new Report(initialParams, result, nodeStatistics));
+        mapper.setVisibility(JsonMethod.FIELD, JsonAutoDetect.Visibility.ANY);
+        mapper.writeValue(f, new Report(initialParams, result, nodeStatistics, programArgs));
     }
 
     @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class ReportCreator<Params, Result> {
         private final Params initialParams;
         private final Result result;
         private final Map<Integer, Statistics> nodeStatistics;
+        private final ProgramArgs args;
     }
 
 }

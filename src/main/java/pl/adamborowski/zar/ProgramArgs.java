@@ -2,6 +2,7 @@ package pl.adamborowski.zar;
 
 import lombok.Getter;
 import org.apache.log4j.Level;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.kohsuke.args4j.Option;
 import pl.adamborowski.dcframework.config.NodeConfig;
 
@@ -45,6 +46,7 @@ public class ProgramArgs {
     @Option(name = "-tx", usage = "max threshold", aliases = "--max-threshold", metaVar = "<number>")
     private int maxThreshold = 700;
 
+    @JsonIgnore
     public NodeConfig getNodeConfig() {
         return new NodeConfig(numThreads, batchSize, DummyProblem.Params.of(startParameter, endParameter), optimizeShortReturn, optimizeInitialDistribution, randomThreshold, minThreshold, maxThreshold);
     }
