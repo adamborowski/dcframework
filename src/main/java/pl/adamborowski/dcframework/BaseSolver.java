@@ -2,7 +2,6 @@ package pl.adamborowski.dcframework;
 
 import com.google.common.base.Throwables;
 import lombok.Setter;
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQObjectMessage;
 import pl.adamborowski.dcframework.api.AddressingQueueSender;
 import pl.adamborowski.dcframework.api.GlobalQueueReceiver;
@@ -37,9 +36,8 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
     private long supplierInterval = 1000;
     @Setter
     private long supplierIntervalSubsequent = 50;
-    @Setter
-    private String connectionUrl;
     private LocalQueueSupplier supplier;
+    @Setter
     private Connection connection;
     private Session syncSesssion;
 
@@ -66,9 +64,6 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
 
         final LocalQueue localQueue = new SimpleLocalQueue<>();
 
-        final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(connectionUrl);
-        connection = factory.createConnection();
-        connection.start();
         syncSesssion = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         final Session asyncSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
@@ -125,12 +120,6 @@ public class BaseSolver<Params extends Serializable, Result extends Serializable
             } catch (JMSException e) {
                 Throwables.propagate(e);
             }
-        }
-        try {
-            connection.close();
-            log.info("SharingLocalQueue ActiveMQ stopped");
-        } catch (JMSException e) {
-            Throwables.propagate(e);
         }
     }
 

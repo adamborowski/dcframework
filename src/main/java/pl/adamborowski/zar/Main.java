@@ -13,11 +13,12 @@ import pl.adamborowski.dcframework.config.SlaveConfigPhase;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
-import javax.jms.Session;
 import java.util.Collection;
 
 
 public class Main {
+
+    public static final Logger log = Logger.getLogger(Main.class);
 
     public static void main(String[] args) throws CmdLineException {
         ProgramArgs options = new ProgramArgs();
@@ -57,23 +58,29 @@ public class Main {
 
         if (isMaster) {
             nodeConfig = options.getNodeConfig();
-            MasterConfigPhase masterConfigPhase = new MasterConfigPhase(connection.createSession(false, Session.AUTO_ACKNOWLEDGE));
+            MasterConfigPhase masterConfigPhase = new MasterConfigPhase(connection);
             slaveIds = masterConfigPhase.perform(nodeConfig);
         } else {
-            SlaveConfigPhase slaveConfigPhase = new SlaveConfigPhase(connection.createSession(true, Session.AUTO_ACKNOWLEDGE));
+            SlaveConfigPhase slaveConfigPhase = new SlaveConfigPhase(connection);
             nodeConfig = slaveConfigPhase.perform(nodeId);
         }
 
-        //todo below we use options... to configure our solver, let's use a nodeConfig, which for slaves is given from master
+        startComputing(nodeId, connection, nodeConfig);
+        connection.close();
+        log.info("ActiveMQ connection closed");
 
 
+    }
+
+    private static void startComputing(Integer nodeId, Connection connection, NodeConfig nodeConfig) {
+        log.info("Node " + nodeId + " starting computing");
+        log.info("Options: " + nodeConfig.toString());
         BaseSolver<DummyProblem.Params, Double> solver = new BaseSolver<>();//todo solver can be not generic - just BaseSolver using task - it doesn't require Params and Result templates
         Problem problem = new DummyProblem();
-        solver.setup(problem, options.getNumThreads(), options.getNodeId(), options.getBatchSize());
-        solver.setConnectionUrl(options.getConnectionUrl());
-        Double result = solver.process(DummyProblem.Params.of(options.getStartParameter(), options.getEndParameter()));
+        solver.setup(problem, nodeConfig.getNumThreads(), nodeId, nodeConfig.getBatchSize());
+        solver.setConnection(connection);
+        Double result = solver.process((DummyProblem.Params) nodeConfig.getInitialParams());
         System.out.println(String.format("Result: %.6f", result));
-        //todo INFO severity message: computation time, other statistics
     }
 
     private static Connection createConnection(ProgramArgs options) throws JMSException {

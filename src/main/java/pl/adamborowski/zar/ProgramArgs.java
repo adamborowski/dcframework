@@ -28,7 +28,9 @@ public class ProgramArgs {
     @Option(name = "-u", usage = "connection url", aliases = "--connection-url", metaVar = "<protocol>://<host>:<port>")
     private String connectionUrl = "tcp://localhost:61616";
 
+    @Option(name="-r", usage = "report output file", aliases = "--report-output-file", metaVar = "<path to file>")
+
     public NodeConfig getNodeConfig() {
-        return new NodeConfig(connectionUrl, numThreads);
+        return new NodeConfig(numThreads, batchSize, DummyProblem.Params.of(startParameter, endParameter));
     }
 }

@@ -1,5 +1,6 @@
 package pl.adamborowski.dcframework.comm;
 
+import com.google.common.base.Throwables;
 import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
 import pl.adamborowski.dcframework.LocalQueue;
@@ -30,6 +31,7 @@ public class LocalQueueSupplier {
 
     public void stop() {
         running = false;
+        this.thread.interrupt();
     }
 
     private boolean shouldQueueBeBigger() {
@@ -62,12 +64,13 @@ public class LocalQueueSupplier {
                     }
                     Thread.sleep(checkInterval);
                 }
-            } catch (InterruptedException e) {
-                log.error("Supplier interrupted during working", e);
-                System.exit(123);
-            } catch (JMSException e) {
-                log.trace("Supplier can't receive global task: ", e);
-                System.exit(123);
+            } catch (InterruptedException | JMSException e) {
+                if (Throwables.getRootCause(e) instanceof InterruptedException) {
+                    log.info("Supplied interrupted");
+                } else {
+                    log.error("Supplier can't receive global task: ", e);
+                    System.exit(123);
+                }
             }
             log.info("supplier stopped");
         }
