@@ -1,11 +1,11 @@
-package pl.adamborowski.dcframework.comm;
+package pl.adamborowski.dcframework.remote;
 
 import com.google.common.base.Throwables;
 import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
-import pl.adamborowski.dcframework.LocalQueue;
-import pl.adamborowski.dcframework.api.GlobalQueueReceiver;
-import pl.adamborowski.dcframework.comm.data.TaskToComputeTO;
+import pl.adamborowski.dcframework.node.LocalQueue;
+import pl.adamborowski.dcframework.remote.comm.GlobalQueueReceiver;
+import pl.adamborowski.dcframework.remote.data.TaskToComputeTO;
 
 import javax.jms.JMSException;
 

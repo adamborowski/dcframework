@@ -1,4 +1,4 @@
-package pl.adamborowski.dcframework;
+package pl.adamborowski.dcframework.node;
 
 public interface Problem<Params, Result> {
 

@@ -5,6 +5,8 @@ import org.apache.log4j.Level;
 import org.kohsuke.args4j.Option;
 import pl.adamborowski.dcframework.config.NodeConfig;
 
+import java.io.File;
+
 @Getter
 public class ProgramArgs {
     @Option(name = "-s", usage = "start parameter", aliases = "--start", metaVar = "<number>")
@@ -29,6 +31,7 @@ public class ProgramArgs {
     private String connectionUrl = "tcp://localhost:61616";
 
     @Option(name="-r", usage = "report output file", aliases = "--report-output-file", metaVar = "<path to file>")
+    private File reportFile;
 
     public NodeConfig getNodeConfig() {
         return new NodeConfig(numThreads, batchSize, DummyProblem.Params.of(startParameter, endParameter));

@@ -1,6 +1,6 @@
 package pl.adamborowski.zar;
 
-import pl.adamborowski.dcframework.Problem;
+import pl.adamborowski.dcframework.node.Problem;
 
 import java.io.Serializable;
 

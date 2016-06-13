@@ -5,11 +5,11 @@ import org.apache.log4j.Logger;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.OptionHandlerFilter;
-import pl.adamborowski.dcframework.BaseSolver;
-import pl.adamborowski.dcframework.Problem;
 import pl.adamborowski.dcframework.config.MasterConfigPhase;
 import pl.adamborowski.dcframework.config.NodeConfig;
 import pl.adamborowski.dcframework.config.SlaveConfigPhase;
+import pl.adamborowski.dcframework.node.BaseSolver;
+import pl.adamborowski.dcframework.node.Problem;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;

@@ -1,14 +1,14 @@
-package pl.adamborowski.dcframework.comm;
+package pl.adamborowski.dcframework.remote;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
-import pl.adamborowski.dcframework.LocalQueue;
-import pl.adamborowski.dcframework.Task;
-import pl.adamborowski.dcframework.TaskFactory;
-import pl.adamborowski.dcframework.api.AddressingQueueSender;
-import pl.adamborowski.dcframework.api.GlobalQueueSender;
-import pl.adamborowski.dcframework.comm.data.TaskComputedTO;
-import pl.adamborowski.dcframework.comm.data.TaskToComputeTO;
+import pl.adamborowski.dcframework.node.LocalQueue;
+import pl.adamborowski.dcframework.node.Task;
+import pl.adamborowski.dcframework.node.TaskFactory;
+import pl.adamborowski.dcframework.remote.comm.AddressingQueueSender;
+import pl.adamborowski.dcframework.remote.comm.GlobalQueueSender;
+import pl.adamborowski.dcframework.remote.data.TaskComputedTO;
+import pl.adamborowski.dcframework.remote.data.TaskToComputeTO;
 
 import javax.jms.JMSException;
 

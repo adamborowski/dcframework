@@ -1,4 +1,4 @@
-package pl.adamborowski.dcframework.comm;
+package pl.adamborowski.dcframework.remote;
 
 public class TaskQueueNameResolver {
     public static String getQueueNameFor(int nodeId) {

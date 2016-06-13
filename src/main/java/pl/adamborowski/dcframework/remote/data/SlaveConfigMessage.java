@@ -1,4 +1,4 @@
-package pl.adamborowski.dcframework.comm.data;
+package pl.adamborowski.dcframework.remote.data;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

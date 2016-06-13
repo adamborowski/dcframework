@@ -1,9 +1,9 @@
-package pl.adamborowski.dcframework.comm;
+package pl.adamborowski.dcframework.remote;
 
 import com.google.common.base.Throwables;
 import lombok.RequiredArgsConstructor;
-import pl.adamborowski.dcframework.LocalQueue;
-import pl.adamborowski.dcframework.Task;
+import pl.adamborowski.dcframework.node.LocalQueue;
+import pl.adamborowski.dcframework.node.Task;
 
 import javax.jms.JMSException;
 import java.util.Collection;

@@ -1,10 +1,10 @@
 package pl.adamborowski.dcframework.config;
 
 import org.apache.log4j.Logger;
-import pl.adamborowski.dcframework.api.ActiveMQReceiver;
-import pl.adamborowski.dcframework.api.ActiveMQSender;
-import pl.adamborowski.dcframework.comm.TaskQueueNameResolver;
-import pl.adamborowski.dcframework.comm.data.SlaveConfigMessage;
+import pl.adamborowski.dcframework.remote.TaskQueueNameResolver;
+import pl.adamborowski.dcframework.remote.data.SlaveConfigMessage;
+import pl.adamborowski.dcframework.util.ActiveMQReceiver;
+import pl.adamborowski.dcframework.util.ActiveMQSender;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;

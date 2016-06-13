@@ -1,4 +1,4 @@
-package pl.adamborowski.dcframework.api;
+package pl.adamborowski.dcframework.remote;
 
 import com.google.common.base.Objects;
 import lombok.AllArgsConstructor;

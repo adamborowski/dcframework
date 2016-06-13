@@ -1,7 +1,6 @@
-package pl.adamborowski.dcframework.comm;
+package pl.adamborowski.dcframework.remote;
 
-import pl.adamborowski.dcframework.Task;
-import pl.adamborowski.dcframework.api.GlobalId;
+import pl.adamborowski.dcframework.node.Task;
 
 import java.util.HashMap;
 import java.util.Map;

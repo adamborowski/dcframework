@@ -1,4 +1,4 @@
-package pl.adamborowski.dcframework;
+package pl.adamborowski.dcframework.node;
 
 import org.apache.log4j.Logger;
 

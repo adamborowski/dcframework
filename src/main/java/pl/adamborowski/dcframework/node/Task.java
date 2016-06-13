@@ -1,9 +1,9 @@
-package pl.adamborowski.dcframework;
+package pl.adamborowski.dcframework.node;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import pl.adamborowski.dcframework.api.GlobalId;
+import pl.adamborowski.dcframework.remote.GlobalId;
 
 @RequiredArgsConstructor
 public class Task<Params, Result> {

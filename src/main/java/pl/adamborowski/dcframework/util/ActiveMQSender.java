@@ -1,7 +1,7 @@
-package pl.adamborowski.dcframework.api;
+package pl.adamborowski.dcframework.util;
 
 import org.apache.log4j.Logger;
-import pl.adamborowski.dcframework.comm.data.TransferObject;
+import pl.adamborowski.dcframework.remote.data.TransferObject;
 
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;

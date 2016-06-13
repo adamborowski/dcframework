@@ -1,17 +1,17 @@
-package pl.adamborowski.dcframework;
+package pl.adamborowski.dcframework.node;
 
 import com.google.common.base.Throwables;
 import lombok.Setter;
 import org.apache.activemq.command.ActiveMQObjectMessage;
-import pl.adamborowski.dcframework.api.AddressingQueueSender;
-import pl.adamborowski.dcframework.api.GlobalQueueReceiver;
-import pl.adamborowski.dcframework.api.GlobalQueueSender;
-import pl.adamborowski.dcframework.api.OwningQueueReceiver;
-import pl.adamborowski.dcframework.comm.LocalQueueSupplier;
-import pl.adamborowski.dcframework.comm.RemoteTransferManager;
-import pl.adamborowski.dcframework.comm.SharingLocalQueue;
-import pl.adamborowski.dcframework.comm.TaskCache;
-import pl.adamborowski.dcframework.comm.data.ShutdownMessage;
+import pl.adamborowski.dcframework.remote.LocalQueueSupplier;
+import pl.adamborowski.dcframework.remote.RemoteTransferManager;
+import pl.adamborowski.dcframework.remote.SharingLocalQueue;
+import pl.adamborowski.dcframework.remote.TaskCache;
+import pl.adamborowski.dcframework.remote.comm.AddressingQueueSender;
+import pl.adamborowski.dcframework.remote.comm.GlobalQueueReceiver;
+import pl.adamborowski.dcframework.remote.comm.GlobalQueueSender;
+import pl.adamborowski.dcframework.remote.comm.OwningQueueReceiver;
+import pl.adamborowski.dcframework.remote.data.ShutdownMessage;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;

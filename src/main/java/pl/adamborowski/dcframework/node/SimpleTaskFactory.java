@@ -1,6 +1,6 @@
-package pl.adamborowski.dcframework;
+package pl.adamborowski.dcframework.node;
 
-import pl.adamborowski.dcframework.api.GlobalId;
+import pl.adamborowski.dcframework.remote.GlobalId;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

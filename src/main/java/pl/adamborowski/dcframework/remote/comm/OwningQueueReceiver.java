@@ -1,8 +1,9 @@
-package pl.adamborowski.dcframework.api;
+package pl.adamborowski.dcframework.remote.comm;
 
-import pl.adamborowski.dcframework.comm.RemoteTransferManager;
-import pl.adamborowski.dcframework.comm.TaskQueueNameResolver;
-import pl.adamborowski.dcframework.comm.data.TaskComputedTO;
+import pl.adamborowski.dcframework.remote.RemoteTransferManager;
+import pl.adamborowski.dcframework.remote.TaskQueueNameResolver;
+import pl.adamborowski.dcframework.remote.data.TaskComputedTO;
+import pl.adamborowski.dcframework.util.ActiveMQListener;
 
 import javax.jms.JMSException;
 import javax.jms.Session;

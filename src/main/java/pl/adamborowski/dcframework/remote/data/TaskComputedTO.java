@@ -1,8 +1,8 @@
-package pl.adamborowski.dcframework.comm.data;
+package pl.adamborowski.dcframework.remote.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import pl.adamborowski.dcframework.api.GlobalId;
+import pl.adamborowski.dcframework.remote.GlobalId;
 
 /**
  * A Task transfer object for task which was computed on foreign node and has to be transferred to native node to continue merging
