@@ -4,11 +4,11 @@ from colored import fg, attr
 import modules.run
 from modules.registers import *
 
-output_base = sys.argv[1]
-node_index = sys.argv[2]
+node_index = sys.argv[1]
 if node_index != '0':
-    master_url = 'tcp://' + sys.argv[3] + ':61616'
-
+    master_url = 'tcp://' + sys.argv[2] + ':61616'
+else:
+    output_base = sys.argv[2]
 problem_size = [10000, 100000, 1000000]
 tx = [1000, 2000, 4000, 16000, 64000, 128000]
 # ti = 0.5*tx
