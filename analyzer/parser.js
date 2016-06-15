@@ -1,6 +1,6 @@
 var Finder = require('./file-finder');
 var finder = new Finder();
-finder.getFiles('/Users/aborowski/Documents/dcframework-reports/node1_2', loadJson);
+finder.getFiles('/Users/aborowski/Documents/dcframework-reports/node1_2_3_4_6_8', loadJson);
 var fileReg = /(.*)\.run\.(\d)\.json/;
 
 function mean(a, b) {
@@ -61,6 +61,26 @@ function loadJson(files) {
     }
     // console.log(casesByProblemSize);
 
-
-    // console.log(runsByParams)
+    // var SUPER_ID=271;
+    //
+    // var values = function (a) {
+    //     return Object.keys(a).map(x=>a[x])
+    // };
+    //
+    // var res = [caseArray[SUPER_ID]]
+    // if (res.length > 1) {
+    //     console.log('more precise!')
+    //     console.log(res)
+    // }
+    // if (res.length == 0) {
+    //     console.log('no results')
+    // }
+    // else {
+    //     var run = res[0].runs[0];
+    //     var statistics = values(run.nodeStatistics);
+    //     console.log(statistics)
+    //     console.log('compute time:', res[0].computationTime)
+    //     console.log('task proceed:', statistics.map(a=>a.numTaskProcessed));
+    //     console.log('sum sent to global:', statistics.reduce((res, a)=>res + a.numTaskSentToGlobal, 0))
+    // }
 }
