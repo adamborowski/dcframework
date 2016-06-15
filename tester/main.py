@@ -57,7 +57,7 @@ def do_test(p, indices):
         file_name = output_base+'/node.' + node_index + '.' + '-'.join(indices) + '.run.' + str(i) + '.json'
         args = '-r ' + file_name + ' ' + arguments
         cmd = './run.sh -r ' + file_name + ' ' + arguments+' -l info'
-        print col1 + cmd + res
+        sys.stdout.write(col1 + cmd + res)
         modules.run.run(cmd)
 
 
