@@ -13,4 +13,4 @@ def run(cmd):
     for line in runProcess(cmd.split()):
         # Eliminate leading and trailing whitespace
         line.strip()
-        print line
+        print(line, end="")
