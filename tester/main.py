@@ -5,6 +5,8 @@ import modules.run
 from modules.registers import *
 
 node_index = sys.argv[1]
+if node_index > 0:
+    master_url = 'tcp://' + sys.argv[2] + ':61616'
 
 problem_size = [10000, 100000, 1000000]
 tx = [1000, 2000, 4000, 16000, 64000, 128000]
@@ -38,7 +40,8 @@ def get_cmd_arguments(p):
         if p['op2']:
             a.append('-o2')
         a.extend(['-n', str(p['num_threads'])])
-
+    else:
+        a.insert(0, '-u ' + master_url)
     cmd = ' '.join(a)
     return cmd
 
