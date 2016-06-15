@@ -40,9 +40,9 @@ public class MasterConfigPhase {
             if (slaveResponse == null) {
                 break;
             }
-//            if (!nodeConfig.equals(slaveResponse.getNodeConfig())) {
-//                throw new IllegalStateException("Config hash mismatch... " + slaveResponse.getNodeConfig() + " != " + nodeConfig);
-//            }
+            if (!nodeConfig.toString().equals(slaveResponse.getNodeConfig().toString())) {
+                throw new IllegalStateException("Config hash mismatch... " + slaveResponse.getNodeConfig() + " != " + nodeConfig);
+            }
             slaveIds.add(slaveResponse.getNodeId());
             log.info("Got slave response from node " + slaveResponse.getNodeId());
         }

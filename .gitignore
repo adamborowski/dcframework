@@ -5,3 +5,4 @@ target
 activemq-data
 reports
 paths.txt
+*.pyc
