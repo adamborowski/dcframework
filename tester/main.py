@@ -7,6 +7,7 @@ from modules.registers import *
 node_index = sys.argv[1]
 if node_index != '0':
     master_url = 'tcp://' + sys.argv[2] + ':61616'
+    output_base = "/dev/null"
 else:
     output_base = sys.argv[2]
 problem_size = [10000, 100000, 1000000]
