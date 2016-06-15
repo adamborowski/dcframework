@@ -80,7 +80,9 @@ public class RemoteTransferManager {
      */
     public void localNativeToDelegateRemote(Task task) throws JMSException {
         assert !task.isDelegate();
-        assert task.inState(Task.State.AWAITING);
+        if(!task.inState(Task.State.AWAITING)){
+            log.warn("localNativeToDelegateRemote: got not awaiting task, ignoring then");
+        }
         cache.park(task);
         TaskToComputeTO transfer = new TaskToComputeTO(task.getGlobalId(), task.getParams());
         log.debug(String.format("Send local native %s to delegate remote %s", task, transfer));
