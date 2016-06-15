@@ -54,7 +54,7 @@ res = attr('reset')
 
 def do_test(p, indices):
     arguments = get_cmd_arguments(p)
-    for i in range(0, 4):
+    for i in range(0, 2):
         file_name = output_base+'/node.' + node_index + '.' + '-'.join(indices) + '.run.' + str(i) + '.json'
         args = '-r ' + file_name + ' ' + arguments
         cmd = './run.sh -r ' + file_name + ' ' + arguments+' -l info'
