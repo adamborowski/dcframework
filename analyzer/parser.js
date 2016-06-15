@@ -27,6 +27,7 @@ function loadJson(files) {
 
     var counter=0;
     console.log('case\t problem size\t num nodes\t tx\t randomThreshold\t o1\t o2\t num threads\t  computation time');
+    cases.sort((a, b)=>a.problemSize - b.problemSize);
     for (var caseName in cases) {
         var _case = cases[caseName];
         _case.args = _case.runs[0].args;

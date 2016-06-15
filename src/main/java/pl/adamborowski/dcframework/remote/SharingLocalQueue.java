@@ -55,6 +55,7 @@ public class SharingLocalQueue<Params, Result> implements LocalQueue<Params, Res
                             }
                             catch(NoSuchElementException e){
                                 log.warn("Initial distribution element removed during distribution");
+                                localQueue.add(task);
                             }
                     } else if (shouldBeSmaller()) {
                         if (randomYes()) {
