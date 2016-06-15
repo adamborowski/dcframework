@@ -1,7 +1,10 @@
+import sys
 from colored import fg, attr
 
 import modules.run
 from modules.registers import *
+
+node_index = sys.argv[1]
 
 problem_size = [10000, 100000, 1000000]
 tx = [1000, 2000, 4000, 16000, 64000, 128000]
@@ -24,15 +27,17 @@ manager = OverflowManager([
 
 def get_cmd_arguments(p):
     a = []
-    a.extend(['-s', '0', '-e', str(p['problem_size'])])
-    a.extend(['-tx', str(p['tx'])])
-    a.extend(['-ti', str(p['tx'] / 2)])
-    a.extend(['-tr', str(p['tr'])])
-    if p['op1']:
-        a.append('-o1')
-    if p['op2']:
-        a.append('-o2')
-    a.extend(['-n', str(p['num_threads'])])
+    a.extend(['-i', str(node_index)])
+    if node_index == '0':
+        a.extend(['-s', '0', '-e', str(p['problem_size'])])
+        a.extend(['-tx', str(p['tx'])])
+        a.extend(['-ti', str(p['tx'] / 2)])
+        a.extend(['-tr', str(p['tr'])])
+        if p['op1']:
+            a.append('-o1')
+        if p['op2']:
+            a.append('-o2')
+        a.extend(['-n', str(p['num_threads'])])
 
     cmd = ' '.join(a)
     return cmd
