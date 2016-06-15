@@ -10,7 +10,7 @@ if node_index != '0':
     output_base = "/dev/null"
 else:
     output_base = sys.argv[2]
-problem_size = [1000, 10000, 100000]
+problem_size = [1000, 5000, 25000]
 tx = [1000, 4000, 16000]
 # ti = 0.5*tx
 tr = [0.5, 0.8]
