@@ -6,3 +6,4 @@ activemq-data
 reports
 paths.txt
 *.pyc
+node_modules
