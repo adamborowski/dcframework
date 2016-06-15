@@ -1,7 +1,6 @@
 import sys
 from colored import fg, attr
 
-import modules.run
 from modules.registers import *
 
 node_index = sys.argv[1]
@@ -11,7 +10,7 @@ if node_index != '0':
 else:
     output_base = sys.argv[2]
 problem_size = [1000, 10000, 10000]
-tx = [100, 1000, 4000, 16000]
+tx = [1000, 4000, 16000]
 # ti = 0.5*tx
 tr = [0.5, 0.8]
 
@@ -59,7 +58,7 @@ def do_test(p, indices):
         args = '-r ' + file_name + ' ' + arguments
         cmd = './run.sh -r ' + file_name + ' ' + arguments+' -l info'
         print(col1 + cmd + res)
-        modules.run.run(cmd)
+        # modules.run.run(cmd)
 
 
 while True:
