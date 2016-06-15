@@ -58,7 +58,7 @@ def do_test(p, indices):
         args = '-r ' + file_name + ' ' + arguments
         cmd = './run.sh -r ' + file_name + ' ' + arguments+' -l info'
         print(col1 + cmd + res)
-        # modules.run.run(cmd)
+        modules.run.run(cmd)
 
 
 while True:
