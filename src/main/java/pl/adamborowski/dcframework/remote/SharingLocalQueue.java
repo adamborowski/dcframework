@@ -50,11 +50,12 @@ public class SharingLocalQueue<Params, Result> implements LocalQueue<Params, Res
                     localQueue.add(task);
                 } else {
                     if (isMaster && optimizeInitialDistribution && !slavesToDistributeInitialTasks.isEmpty() && localQueue.getNumItemsEnqueued() > 20) {
-                        synchronized (slavesToDistributeInitialTasks) {
-                            if (!slavesToDistributeInitialTasks.isEmpty()) {
+                            try {
                                 transferManager.initialLocalNativeToDelegateRemote(task, slavesToDistributeInitialTasks.remove());
                             }
-                        }
+                            catch(NoSuchElementException e){
+                                log.warn("Initial distribution element removed during distribution");
+                            }
                     } else if (shouldBeSmaller()) {
                         if (randomYes()) {
                             transferManager.localNativeToDelegateRemote(task);
