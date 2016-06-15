@@ -4,9 +4,10 @@ from colored import fg, attr
 import modules.run
 from modules.registers import *
 
-node_index = sys.argv[1]
+output_base = sys.argv[1]
+node_index = sys.argv[2]
 if node_index != '0':
-    master_url = 'tcp://' + sys.argv[2] + ':61616'
+    master_url = 'tcp://' + sys.argv[3] + ':61616'
 
 problem_size = [10000, 100000, 1000000]
 tx = [1000, 2000, 4000, 16000, 64000, 128000]
@@ -53,7 +54,7 @@ res = attr('reset')
 def do_test(p, indices):
     arguments = get_cmd_arguments(p)
     for i in range(0, 4):
-        file_name = 'reports/node.' + node_index + '.' + '-'.join(indices) + '.run.' + str(i) + '.json'
+        file_name = output_base+'/reports/node.' + node_index + '.' + '-'.join(indices) + '.run.' + str(i) + '.json'
         args = '-r ' + file_name + ' ' + arguments
         cmd = './run.sh -r ' + file_name + ' ' + arguments+' -l info'
         print col1 + cmd + res
