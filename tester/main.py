@@ -10,6 +10,10 @@ if node_index != '0':
     output_base = "/dev/null"
 else:
     output_base = sys.argv[2]
+initial_state = 0
+if len(sys.argv)>3:
+    initial_state = int(sys.argv[3])
+
 problem_size = [1000, 5000, 25000]
 tx = [1000, 4000, 16000]
 # ti = 0.5*tx
@@ -26,7 +30,7 @@ manager = OverflowManager([
     CyclicRegister(tr),
     CyclicRegister(op1),
     CyclicRegister(op2),
-    CyclicRegister(num_threads)])
+    CyclicRegister(num_threads)], initial_state=initial_state)
 
 
 def get_cmd_arguments(p):

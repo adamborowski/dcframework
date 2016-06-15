@@ -21,8 +21,10 @@ class CyclicRegister:
 
 
 class OverflowManager:
-    def __init__(self, registers):
+    def __init__(self, registers, initial_state=0):
         self.registers = registers
+        for i in range(0, initial_state):
+            self.next()
 
     def next(self):
         for register in self.registers:
